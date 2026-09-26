@@ -1,5 +1,6 @@
 # Sensitive Credentials
 .env
+frontend/config.js
 secrets.json
 *.pem
 
@@ -16,4 +17,3 @@ Thumbs.db
 dist/
 build/
 *.exe
-
