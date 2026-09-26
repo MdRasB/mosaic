@@ -18,7 +18,7 @@
 | Vanilla JavaScript | ES modules | V1 browser application | `frontend/src/main.js` |
 | Vite | 7.x | Frontend development/build tool | `frontend/package.json`, `frontend/package-lock.json` |
 | Supabase | [TODO] | Auth, PostgreSQL, RLS, and storage | `Mosaic_Project_Complete_Plan_Final.md:3469-3474` |
-| TMDB API | [TODO] | Public media discovery | `Mosaic_Project_Complete_Plan_Final.md:3476-3477` |
+| TMDB API | V3 | Public media discovery for `/explore` | `frontend/src/api/tmdb.js` |
 | Go / net/http / chi / pgx | [TODO] | Later server-side API | `Mosaic_Project_Complete_Plan_Final.md:3482-3487` |
 
 ### 3) Development Toolchain
@@ -40,7 +40,7 @@ npm run preview
 ### 5) Environment and Config
 
 - Config sources: Root `.env.example` for database; frontend has no runtime secrets yet.
-- Required env vars: Planned V1 variables are `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and `VITE_TMDB_API_KEY`; implementation is pending.
+- Required env vars: `VITE_TMDB_API_KEY` is used by M02; Supabase variables remain pending for M05+.
 - Deployment/runtime constraints: Release 1 is planned for Cloudflare Pages, Supabase, and TMDB; Go/Render is optional later.
 
 ### 6) Evidence

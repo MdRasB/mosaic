@@ -6,7 +6,7 @@
 
 | System | Type | Purpose | Auth model | Criticality | Evidence |
 |---|---|---|---|---|---|
-| TMDB | External API | Public media discovery and provider metadata. | Planned browser API key in V1; privacy requirements must be reviewed at implementation time. | High for Explore. | `Mosaic_Project_Complete_Plan_Final.md:156-183` |
+| TMDB | External API | Public media discovery and provider metadata. | Browser API key through `VITE_TMDB_API_KEY` in V1; it is public by design. | High for Explore. | `frontend/src/api/tmdb.js` |
 | Supabase Auth/Data/Storage | Managed auth, database, and storage | User accounts, PostgreSQL data, RLS, and photos. | Planned publishable browser key with RLS; secret key server-only. | High for user features. | `Mosaic_Project_Complete_Plan_Final.md:185-201` |
 | Go API | Planned HTTP service | Server-side aggregation/business logic in later releases. | [TODO] | Later | `Mosaic_Project_Complete_Plan_Final.md:203-232` |
 
@@ -19,19 +19,19 @@
 
 ### 3) Secrets and Credentials Handling
 
-- Credential sources: Planned environment variables; no `.env.example` exists yet.
-- Hardcoding checks: No application code exists; scan found no source/config.
+- Credential sources: `frontend/.env` via Vite environment variables.
+- Hardcoding checks: No TMDB key is hardcoded; the client throws a visible section error when it is missing.
 - Rotation or lifecycle notes: [TODO]
 
 ### 4) Reliability and Failure Behavior
 
-- Retry/backoff behavior: [TODO]
+- Retry/backoff behavior: Section-level retry buttons are implemented; backoff is not needed for M02.
 - Timeout policy: [TODO]
 - Circuit-breaker or fallback behavior: [TODO]
 
 ### 5) Observability for Integrations
 
-- Logging around external calls: [TODO]
+- Logging around external calls: Failed sections are logged with context in `frontend/src/pages/explore/explore.js`.
 - Metrics/tracing coverage: [TODO]
 - Missing visibility gaps: All integration observability is unimplemented.
 
