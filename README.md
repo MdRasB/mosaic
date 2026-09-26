@@ -1,5 +1,26 @@
 # MOSAIC
 
+## License
+
+Mosaic is open-source software licensed under the
+[Apache License 2.0](LICENSE). The license preserves copyright and license
+notices and includes an express patent grant, while allowing free use,
+modification, and redistribution.
+
+This license does not prevent copying or forks; it requires recipients to
+keep the project’s license and attribution notices. Copyright ownership
+remains with the project’s copyright holders. Because Mosaic is developed
+with university collaborators, confirm the named copyright holders and
+university policies before public release.
+
+### TMDB content safety
+
+Explore requests ask TMDB for non-adult results, then apply a second safety
+check using TMDB movie certifications and TV content ratings. Explicit
+certifications such as `NC-17`, `X`, `XXX`, and `TV-MA` are excluded without
+maintaining a manual title blacklist. Results with missing certification data
+are hidden when certification verification fails.
+
 ## Local development
 
 ### Frontend

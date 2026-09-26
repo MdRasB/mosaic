@@ -2,6 +2,8 @@ const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
 const responseCache = new Map();
 const restrictedContentPattern = /\b(?:adult|bondage|erotic|xxx|porn(?:ographic)?|sex(?:ual)?|nude|nudity|intercourse|fetish|lust)\b/i;
+const restrictedMovieRatings = new Set(["NC-17", "X", "XXX"]);
+const restrictedTvRatings = new Set(["TV-MA", "R+", "18", "18+"]);
 
 function getApiKey() {
   const apiKey = import.meta.env?.VITE_TMDB_API_KEY || window.MOSAIC_CONFIG?.tmdbApiKey;
@@ -60,6 +62,27 @@ function isRestrictedContent(item) {
   return item.adult === true || restrictedContentPattern.test(searchableText);
 }
 
+function hasRestrictedCertification(details, type) {
+  if (type === "tv") {
+    return details.content_ratings?.results
+      ?.filter((rating) => rating.iso_3166_1 === "US")
+      .some((rating) => restrictedTvRatings.has(rating.rating)) ?? false;
+  }
+
+  return details.release_dates?.results
+    ?.filter((release) => release.iso_3166_1 === "US")
+    .flatMap((release) => release.release_dates ?? [])
+    .some((release) => restrictedMovieRatings.has(release.certification)) ?? false;
+}
+
+async function getCertificationDetails(item, type) {
+  const response = await request(`/${type}/${item.id}`, {
+    append_to_response: type === "tv" ? "content_ratings" : "release_dates"
+  });
+
+  return hasRestrictedCertification(response, type);
+}
+
 export function normalizeMedia(item, type) {
   return {
     id: item.id,
@@ -75,9 +98,20 @@ export function normalizeMedia(item, type) {
 
 async function getMedia(path, type, params = {}) {
   const data = await request(path, params);
-  return (data.results ?? [])
-    .filter((item) => !isRestrictedContent(item))
-    .map((item) => normalizeMedia(item, type));
+  const candidates = (data.results ?? []).filter((item) => !isRestrictedContent(item));
+  const checks = await Promise.allSettled(candidates.map(async (item) => ({
+    item,
+    restricted: await getCertificationDetails(item, type === "multi" ? item.media_type : type)
+  })));
+
+  return checks.flatMap((check) => {
+    if (check.status === "rejected") {
+      console.warn("Unable to verify media certification; hiding the title.", check.reason);
+      return [];
+    }
+
+    return check.value.restricted ? [] : [normalizeMedia(check.value.item, type)];
+  });
 }
 
 export function getTrending() {
