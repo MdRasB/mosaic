@@ -8,37 +8,60 @@
     <link rel="stylesheet" href="./src/styles/main.css" />
   </head>
   <body>
-    <main class="shell">
-      <header class="topbar">
-        <a class="brand" href="/" aria-label="Mosaic home">
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand sidebar-brand" href="/" aria-label="Mosaic home">
           <span class="brand-mark" aria-hidden="true">M</span>
-          <span>Mosaic</span>
+          <span class="sidebar-label">Mosaic</span>
         </a>
-        <button class="button button-ghost" id="theme-toggle" type="button" aria-pressed="false">
-          Toggle theme
-        </button>
-      </header>
+        <nav class="sidebar-nav" aria-label="Main navigation">
+          <p class="nav-heading sidebar-label">Workspace</p>
+          <a class="nav-link is-active" href="#overview"><span aria-hidden="true">⌂</span><span class="sidebar-label">Overview</span></a>
+          <a class="nav-link" href="#collection"><span aria-hidden="true">▦</span><span class="sidebar-label">Collection</span></a>
+          <a class="nav-link" href="#favorites"><span aria-hidden="true">♡</span><span class="sidebar-label">Favorites</span></a>
+          <p class="nav-heading sidebar-label">Account</p>
+          <a class="nav-link" href="#settings"><span aria-hidden="true">⚙</span><span class="sidebar-label">Settings</span></a>
+        </nav>
+      </aside>
 
-      <section class="hero-panel">
-        <p class="eyebrow">Module M01 · Design system</p>
-        <h1>Your interests. <span>Your collection.</span> Your world.</h1>
-        <p class="hero-copy">A reusable visual foundation for discovery, collection, and connection.</p>
-        <div class="button-row">
-          <button class="button button-primary" type="button">Primary action</button>
-          <button class="button button-secondary" type="button">Secondary action</button>
-        </div>
-      </section>
-
-      <section class="showcase" aria-labelledby="showcase-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Component primitives</p>
-            <h2 id="showcase-title">Built once, reused everywhere.</h2>
+      <div class="app-content">
+        <header class="topbar">
+          <button class="icon-button" id="sidebar-toggle" type="button" aria-label="Collapse sidebar" aria-expanded="true">☰</button>
+          <a class="brand mobile-brand" href="/" aria-label="Mosaic home">
+            <span class="brand-mark" aria-hidden="true">M</span>
+            <span>Mosaic</span>
+          </a>
+          <label class="search-field" for="global-search">
+            <span aria-hidden="true">⌕</span>
+            <input id="global-search" type="search" placeholder="Search your world..." />
+          </label>
+          <div class="topbar-actions">
+            <button class="button button-ghost" id="theme-toggle" type="button" aria-pressed="false">Use light theme</button>
+            <button class="avatar-button" type="button" aria-label="Open profile">MR</button>
           </div>
-          <span class="badge badge-accent">Foundation ready</span>
-        </div>
+        </header>
 
-        <div class="showcase-grid">
+        <main class="shell">
+          <section class="hero-panel" id="overview">
+            <p class="eyebrow">Module M01 · Design system</p>
+            <h1>Your interests. <span>Your collection.</span> Your world.</h1>
+            <p class="hero-copy">A reusable visual foundation for discovery, collection, and connection.</p>
+            <div class="button-row">
+              <button class="button button-primary" id="open-modal" type="button">Open modal</button>
+              <button class="button button-secondary" id="show-loading" type="button">Preview loading</button>
+            </div>
+          </section>
+
+          <section class="showcase" aria-labelledby="showcase-title">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Component primitives</p>
+                <h2 id="showcase-title">Built once, reused everywhere.</h2>
+              </div>
+              <span class="badge badge-accent">Foundation ready</span>
+            </div>
+
+            <div class="showcase-grid">
           <article class="card">
             <div class="poster-placeholder">Poster</div>
             <div class="card-content">
@@ -68,17 +91,33 @@
           <article class="card card-content-only">
             <p class="eyebrow">States</p>
             <div class="state-stack">
-              <div class="state state-loading"><span class="spinner" aria-hidden="true"></span> Loading collection...</div>
+              <div class="state state-loading" id="loading-state"><span class="spinner" aria-hidden="true"></span> Loading collection...</div>
               <div class="state state-success">Saved to your collection.</div>
               <div class="state state-empty">Nothing here yet.</div>
             </div>
             <button class="button button-secondary" type="button" id="toast-trigger">Show toast</button>
           </article>
-        </div>
-      </section>
-    </main>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite">Theme and component styles are ready.</div>
+    <dialog class="modal" id="demo-modal" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Reusable modal</p>
+          <h2 id="modal-title">Add to your collection</h2>
+        </div>
+        <button class="icon-button" id="close-modal" type="button" aria-label="Close modal">×</button>
+      </div>
+      <p class="muted">This dialog provides a consistent surface for confirmations, forms, and media actions.</p>
+      <div class="modal-actions">
+        <button class="button button-ghost" id="cancel-modal" type="button">Cancel</button>
+        <button class="button button-primary" id="confirm-modal" type="button">Confirm</button>
+      </div>
+    </dialog>
     <script type="module" src="./src/main.js"></script>
   </body>
 </html>
