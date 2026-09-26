@@ -133,6 +133,14 @@
   gap: var(--space-2);
 }
 
+.state-loading {
+  display: none;
+}
+
+.state-loading.is-visible {
+  display: block;
+}
+
 .spinner {
   border: 2px solid currentColor;
   border-right-color: transparent;
@@ -161,4 +169,35 @@
 .toast-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+.modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  max-width: min(32rem, calc(100% - 2rem));
+  padding: var(--space-5);
+  width: 100%;
+}
+
+.modal::backdrop {
+  background: rgb(5 5 12 / 65%);
+  backdrop-filter: blur(4px);
+}
+
+.modal-header {
+  align-items: flex-start;
+  display: flex;
+  gap: var(--space-4);
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  margin-top: var(--space-6);
 }

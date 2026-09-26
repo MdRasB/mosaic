@@ -1,4 +1,30 @@
 @media (max-width: 800px) {
+  .app-shell {
+    display: block;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .mobile-brand {
+    display: inline-flex;
+  }
+
+  .topbar {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .topbar .button-ghost {
+    font-size: 0;
+    padding: 0.65rem;
+  }
+
+  .topbar .button-ghost::before {
+    content: "☼";
+    font-size: 1rem;
+  }
+
   .showcase-grid {
     grid-template-columns: 1fr;
   }
@@ -16,6 +42,14 @@
 
   .topbar {
     margin-bottom: var(--space-6);
+  }
+
+  .search-field {
+    order: 5;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
   }
 
   .button-row {
