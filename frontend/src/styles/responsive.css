@@ -1,4 +1,10 @@
 @media (max-width: 800px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     overflow: auto;
   }
@@ -34,12 +40,44 @@
     transform: translateX(0);
   }
 
+  .sidebar-overlay {
+    background: rgb(0 0 0 / 52%);
+    border: 0;
+    display: block;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
+    transition: opacity 180ms ease;
+    width: 100%;
+    z-index: 9;
+  }
+
+  .sidebar-overlay-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .mobile-brand {
     display: inline-flex;
   }
 
   .topbar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     padding: var(--space-3) var(--space-4);
+  }
+
+  .topbar .search-field {
+    grid-column: 1 / -1;
+    margin: 0;
+    max-width: none;
+    order: 2;
+  }
+
+  .topbar-actions {
+    justify-content: flex-end;
+    min-width: 0;
   }
 
   .topbar .button-ghost {
@@ -71,6 +109,7 @@
   .media-row {
     gap: var(--space-4);
     grid-auto-columns: minmax(9rem, 28vw);
+    scrollbar-width: auto;
   }
 
   .section-heading {
@@ -85,15 +124,8 @@
   }
 
   .topbar {
-    margin-bottom: var(--space-6);
-  }
-
-  .search-field {
-    order: 5;
-  }
-
-  .topbar {
-    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
   }
 
   .button-row {
@@ -106,6 +138,19 @@
     min-height: 26rem;
   }
 
+  .explore-intro {
+    min-height: 22rem;
+    padding: var(--space-5);
+  }
+
+  .explore-intro h1 {
+    font-size: clamp(2.35rem, 12vw, 3.6rem);
+  }
+
+  .featured-media-content {
+    padding: var(--space-5);
+  }
+
   .media-row {
     gap: var(--space-4);
     grid-auto-columns: minmax(8.5rem, 42vw);
@@ -116,7 +161,35 @@
   }
 
   .row-control {
-    height: 2.1rem;
-    width: 2.1rem;
+    height: 2.75rem;
+    width: 2.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .shell {
+    padding: var(--space-3);
+  }
+
+  .topbar {
+    padding-inline: var(--space-3);
+  }
+
+  .mobile-brand {
+    font-size: 1.1rem;
+  }
+
+  .brand-mark {
+    height: 1.75rem;
+    width: 1.75rem;
+  }
+
+  .explore-intro h1 {
+    font-size: 2.2rem;
+  }
+
+  .featured-media,
+  .featured-media-content {
+    min-height: 24rem;
   }
 }

@@ -5,6 +5,7 @@ const appShell = document.querySelector(".app-shell");
 const toast = document.querySelector("#toast");
 const sidebar = document.querySelector("#sidebar");
 const sidebarToggle = document.querySelector("#sidebar-toggle");
+const sidebarOverlay = document.querySelector("#sidebar-overlay");
 const loginButton = document.querySelector("#login-button");
 const registerButton = document.querySelector("#register-button");
 const profileButton = document.querySelector("#profile-button");
@@ -64,12 +65,20 @@ themeToggle.addEventListener("click", () => {
 sidebarToggle.addEventListener("click", () => {
   if (window.matchMedia("(max-width: 800px)").matches) {
     const isOpen = sidebar.classList.toggle("sidebar-mobile-open");
+    sidebarOverlay.classList.toggle("sidebar-overlay-visible", isOpen);
     sidebarToggle.setAttribute("aria-expanded", String(isOpen));
     sidebarToggle.setAttribute("aria-label", isOpen ? "Close sidebar" : "Open sidebar");
     return;
   }
 
   setSidebarCollapsed(!sidebar.classList.contains("sidebar-collapsed"));
+});
+
+sidebarOverlay.addEventListener("click", () => {
+  sidebar.classList.remove("sidebar-mobile-open");
+  sidebarOverlay.classList.remove("sidebar-overlay-visible");
+  sidebarToggle.setAttribute("aria-expanded", "false");
+  sidebarToggle.setAttribute("aria-label", "Open sidebar");
 });
 
 // M05 authentication is not implemented yet; these controls document the planned public header.

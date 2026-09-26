@@ -7,6 +7,11 @@ body {
   overflow: hidden;
 }
 
+button,
+input {
+  touch-action: manipulation;
+}
+
 .app-shell {
   display: grid;
   height: 100vh;
@@ -66,6 +71,10 @@ body {
   scrollbar-color: var(--color-border) transparent;
   scrollbar-width: thin;
   transition: width 180ms ease;
+}
+
+.sidebar-overlay {
+  display: none;
 }
 
 .sidebar-brand {
