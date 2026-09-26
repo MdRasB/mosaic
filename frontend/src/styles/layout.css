@@ -79,6 +79,16 @@
   color: var(--color-text);
 }
 
+.nav-link-disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.nav-link-disabled:hover {
+  background: transparent;
+  color: var(--color-muted);
+}
+
 .nav-link.is-active {
   box-shadow: inset 3px 0 var(--color-primary);
 }

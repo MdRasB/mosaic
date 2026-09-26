@@ -15,12 +15,20 @@
           <span class="sidebar-label">Mosaic</span>
         </a>
         <nav class="sidebar-nav" aria-label="Main navigation">
-          <p class="nav-heading sidebar-label">Workspace</p>
-          <a class="nav-link is-active" href="#overview"><span aria-hidden="true">⌂</span><span class="sidebar-label">Overview</span></a>
-          <a class="nav-link" href="#collection"><span aria-hidden="true">▦</span><span class="sidebar-label">Collection</span></a>
-          <a class="nav-link" href="#favorites"><span aria-hidden="true">♡</span><span class="sidebar-label">Favorites</span></a>
+          <p class="nav-heading sidebar-label">Main</p>
+          <a class="nav-link is-active" href="#overview" aria-current="page"><span aria-hidden="true">⌂</span><span class="sidebar-label">Design system</span></a>
+          <a class="nav-link nav-link-disabled" href="#explore" aria-disabled="true"><span aria-hidden="true">◈</span><span class="sidebar-label">Explore</span></a>
+          <p class="nav-heading sidebar-label">Media</p>
+          <a class="nav-link nav-link-disabled" href="#movies" aria-disabled="true"><span aria-hidden="true">▣</span><span class="sidebar-label">Movies</span></a>
+          <a class="nav-link nav-link-disabled" href="#tv" aria-disabled="true"><span aria-hidden="true">▤</span><span class="sidebar-label">TV Shows</span></a>
+          <a class="nav-link nav-link-disabled" href="#books" aria-disabled="true"><span aria-hidden="true">▥</span><span class="sidebar-label">Books</span></a>
+          <p class="nav-heading sidebar-label">My library</p>
+          <a class="nav-link nav-link-disabled" href="#collection" aria-disabled="true"><span aria-hidden="true">▦</span><span class="sidebar-label">Collection</span></a>
+          <a class="nav-link nav-link-disabled" href="#favorites" aria-disabled="true"><span aria-hidden="true">♡</span><span class="sidebar-label">Favorites</span></a>
+          <a class="nav-link nav-link-disabled" href="#watchlist" aria-disabled="true"><span aria-hidden="true">◷</span><span class="sidebar-label">Watchlist</span></a>
           <p class="nav-heading sidebar-label">Account</p>
-          <a class="nav-link" href="#settings"><span aria-hidden="true">⚙</span><span class="sidebar-label">Settings</span></a>
+          <a class="nav-link nav-link-disabled" href="#profile" aria-disabled="true"><span aria-hidden="true">○</span><span class="sidebar-label">Profile</span></a>
+          <a class="nav-link nav-link-disabled" href="#settings" aria-disabled="true"><span aria-hidden="true">⚙</span><span class="sidebar-label">Settings</span></a>
         </nav>
       </aside>
 
@@ -37,13 +45,15 @@
           </label>
           <div class="topbar-actions">
             <button class="button button-ghost" id="theme-toggle" type="button" aria-pressed="false">Use light theme</button>
-            <button class="avatar-button" type="button" aria-label="Open profile">MR</button>
+            <button class="button button-ghost topbar-auth-action" id="login-button" type="button">Login</button>
+            <button class="button button-primary topbar-auth-action" id="register-button" type="button">Register</button>
+            <button class="avatar-button" id="profile-button" type="button" aria-label="Open profile">MR</button>
           </div>
         </header>
 
         <main class="shell">
           <section class="hero-panel" id="overview">
-            <p class="eyebrow">Module M01 · Design system</p>
+            <p class="eyebrow">Mosaic · Design system preview</p>
             <h1>Your interests. <span>Your collection.</span> Your world.</h1>
             <p class="hero-copy">A reusable visual foundation for discovery, collection, and connection.</p>
             <div class="button-row">
