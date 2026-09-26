@@ -1,6 +1,7 @@
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
 const responseCache = new Map();
+const restrictedContentPattern = /\b(?:adult|bondage|erotic|xxx|porn(?:ographic)?|sex(?:ual)?|nude|nudity|intercourse|fetish|lust)\b/i;
 
 function getApiKey() {
   const apiKey = import.meta.env?.VITE_TMDB_API_KEY || window.MOSAIC_CONFIG?.tmdbApiKey;
@@ -49,6 +50,16 @@ export function imageUrl(path, size = "w500") {
   return path ? `${TMDB_IMAGE_BASE_URL}/${size}${path}` : "";
 }
 
+function isRestrictedContent(item) {
+  const searchableText = [
+    item.title,
+    item.name,
+    item.overview
+  ].filter(Boolean).join(" ");
+
+  return item.adult === true || restrictedContentPattern.test(searchableText);
+}
+
 export function normalizeMedia(item, type) {
   return {
     id: item.id,
@@ -65,7 +76,7 @@ export function normalizeMedia(item, type) {
 async function getMedia(path, type, params = {}) {
   const data = await request(path, params);
   return (data.results ?? [])
-    .filter((item) => item.adult !== true)
+    .filter((item) => !isRestrictedContent(item))
     .map((item) => normalizeMedia(item, type));
 }
 
