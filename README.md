@@ -26,6 +26,19 @@ Open <http://localhost:5173/explore> to browse live TMDB content. The key is
 bundled into the browser for this public V1 integration and must not be a
 Supabase secret or service-role key.
 
+### Live Server
+
+Live Server does not read `.env` files. To use it, create the ignored local
+runtime configuration:
+
+```bash
+cp frontend/config.example.js frontend/config.js
+# Set tmdbApiKey in frontend/config.js.
+```
+
+Then open `frontend/index.html` through Live Server. The committed example
+files intentionally contain no credentials.
+
 The frontend entrypoint uses relative paths, so opening `frontend/` as the
 workspace in a generic Live Server also works. Do not open the repository root
 as the Live Server root because the frontend entrypoint is inside `frontend/`.

@@ -3,10 +3,12 @@ const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
 const responseCache = new Map();
 
 function getApiKey() {
-  const apiKey = import.meta.env?.VITE_TMDB_API_KEY;
+  const apiKey = import.meta.env?.VITE_TMDB_API_KEY || window.MOSAIC_CONFIG?.tmdbApiKey;
 
   if (!apiKey) {
-    throw new Error("TMDB API key is not configured.");
+    throw new Error(
+      "TMDB API key is not configured. Use Vite with frontend/.env or copy config.example.js to config.js for Live Server."
+    );
   }
 
   return apiKey;
