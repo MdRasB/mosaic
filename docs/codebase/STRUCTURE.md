@@ -14,9 +14,9 @@
 
 ### 2) Entry Points
 
-- Main runtime entry: [TODO] `frontend/index.html` and Vite are planned but not initialized.
+- Main runtime entry: `frontend/index.html`, loading `frontend/src/main.js`.
 - Secondary entry points: [TODO] Go API entry at `backend/cmd/api/main.go` is planned but not initialized.
-- How entry is selected: [TODO] No package or Go module configuration exists yet.
+- How entry is selected: `frontend/package.json` scripts invoke Vite.
 
 ### 3) Module Boundaries
 
@@ -32,13 +32,14 @@ These boundaries are planned, not yet represented by implementation files.
 
 ### 4) Naming and Organization Rules
 
-- File naming pattern: [TODO] The plan shows lowercase names such as `router.js`, `media-card/`, and `main.go`.
+- File naming pattern: Lowercase JavaScript and CSS filenames such as `main.js`, `variables.css`, and `vite.config.js`.
 - Directory organization pattern: frontend by technical UI layer/page, backend by internal layer/domain/provider, database by SQL concern.
 - Import aliasing or path conventions: [TODO]
 
 ### 5) Evidence
 
 - `Mosaic_Project_Complete_Plan_Final.md:1949-2117`
-- `README.md`
-- `.gitignore`
+- `frontend/index.html`
+- `frontend/package.json`
+- `frontend/src/main.js`
 - Current scaffold directories created on `feature/project-structure`

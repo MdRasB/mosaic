@@ -1,0 +1,79 @@
+.shell {
+  margin: 0 auto;
+  max-width: 76rem;
+  padding: var(--space-5);
+}
+
+.topbar, .section-heading, .card-footer, .button-row {
+  align-items: center;
+  display: flex;
+  gap: var(--space-3);
+}
+
+.topbar, .section-heading {
+  justify-content: space-between;
+}
+
+.topbar {
+  margin-bottom: var(--space-8);
+}
+
+.brand {
+  align-items: center;
+  display: inline-flex;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  gap: var(--space-2);
+}
+
+.brand-mark {
+  align-items: center;
+  background: var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary-ink);
+  display: inline-flex;
+  height: 2rem;
+  justify-content: center;
+  width: 2rem;
+}
+
+.hero-panel {
+  background: linear-gradient(120deg, var(--color-surface), var(--color-surface-raised));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  padding: clamp(var(--space-6), 8vw, var(--space-8));
+  position: relative;
+}
+
+.hero-panel::after {
+  background: var(--color-secondary);
+  border-radius: 50%;
+  content: "";
+  filter: blur(80px);
+  height: 14rem;
+  opacity: 0.3;
+  position: absolute;
+  right: 4%;
+  top: 10%;
+  width: 14rem;
+}
+
+.hero-copy {
+  color: var(--color-muted);
+  font-size: 1.1rem;
+  margin: var(--space-4) 0 var(--space-5);
+  max-width: 34rem;
+}
+
+.showcase {
+  padding: var(--space-8) 0;
+}
+
+.showcase-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: var(--space-5);
+}
