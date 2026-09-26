@@ -1,90 +1,22 @@
 import "./styles/main.css";
 
-const app = document.querySelector("#app");
-
-app.innerHTML = `
-  <div class="shell">
-    <header class="topbar">
-      <a class="brand" href="/" aria-label="Mosaic home">
-        <span class="brand-mark" aria-hidden="true">M</span>
-        <span>Mosaic</span>
-      </a>
-      <button class="button button-ghost" id="theme-toggle" type="button" aria-pressed="false">
-        Toggle theme
-      </button>
-    </header>
-
-    <section class="hero-panel">
-      <p class="eyebrow">Module M01 · Design system</p>
-      <h1>Your interests. <span>Your collection.</span> Your world.</h1>
-      <p class="hero-copy">A reusable visual foundation for discovery, collection, and connection.</p>
-      <div class="button-row">
-        <button class="button button-primary" type="button">Primary action</button>
-        <button class="button button-secondary" type="button">Secondary action</button>
-      </div>
-    </section>
-
-    <section class="showcase" aria-labelledby="showcase-title">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Component primitives</p>
-          <h2 id="showcase-title">Built once, reused everywhere.</h2>
-        </div>
-        <span class="badge badge-accent">Foundation ready</span>
-      </div>
-
-      <div class="showcase-grid">
-        <article class="card">
-          <div class="poster-placeholder">Poster</div>
-          <div class="card-content">
-            <div class="card-meta"><span>Movie</span><span>2024</span></div>
-            <h3>Example media card</h3>
-            <p class="muted">Poster, metadata, rating, and actions share one visual language.</p>
-            <div class="card-footer"><span class="rating">★ 8.7</span><span class="badge">Trending</span></div>
-          </div>
-        </article>
-
-        <article class="card card-content-only">
-          <p class="eyebrow">Form controls</p>
-          <label class="field-label" for="demo-search">Search</label>
-          <input class="input" id="demo-search" type="search" placeholder="Search your world..." />
-          <label class="field-label" for="demo-select">Media type</label>
-          <select class="input" id="demo-select">
-            <option>All media</option>
-            <option>Movies</option>
-            <option>Books</option>
-          </select>
-          <div class="button-row">
-            <button class="button button-primary" type="button">Apply filters</button>
-            <button class="button button-ghost" type="button">Clear</button>
-          </div>
-        </article>
-
-        <article class="card card-content-only">
-          <p class="eyebrow">States</p>
-          <div class="state-stack">
-            <div class="state state-loading"><span class="spinner" aria-hidden="true"></span> Loading collection...</div>
-            <div class="state state-success">Saved to your collection.</div>
-            <div class="state state-empty">Nothing here yet.</div>
-          </div>
-          <button class="button button-secondary" type="button" id="toast-trigger">Show toast</button>
-        </article>
-      </div>
-    </section>
-  </div>
-  <div class="toast" id="toast" role="status" aria-live="polite">Theme and component styles are ready.</div>
-`;
-
 const themeToggle = document.querySelector("#theme-toggle");
 const toast = document.querySelector("#toast");
+const toastTrigger = document.querySelector("#toast-trigger");
 
-themeToggle.addEventListener("click", () => {
-  const isLight = document.documentElement.toggleAttribute("data-theme");
+function setTheme(isLight) {
+  document.documentElement.toggleAttribute("data-theme", isLight);
   themeToggle.setAttribute("aria-pressed", String(isLight));
   themeToggle.textContent = isLight ? "Use dark theme" : "Use light theme";
-});
+}
 
-document.querySelector("#toast-trigger").addEventListener("click", () => {
+function showToast() {
   toast.classList.add("toast-visible");
   window.setTimeout(() => toast.classList.remove("toast-visible"), 2600);
+}
+
+themeToggle.addEventListener("click", () => {
+  setTheme(!document.documentElement.hasAttribute("data-theme"));
 });
+
+toastTrigger.addEventListener("click", showToast);
