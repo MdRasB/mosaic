@@ -19,7 +19,7 @@ async function request(path, params = {}) {
   url.searchParams.set("api_key", getApiKey());
 
   Object.entries(params).forEach(([key, value]) => {
-    if (value) {
+    if (value !== undefined && value !== null) {
       url.searchParams.set(key, value);
     }
   });
@@ -64,27 +64,29 @@ export function normalizeMedia(item, type) {
 
 async function getMedia(path, type, params = {}) {
   const data = await request(path, params);
-  return (data.results ?? []).map((item) => normalizeMedia(item, type));
+  return (data.results ?? [])
+    .filter((item) => item.adult !== true)
+    .map((item) => normalizeMedia(item, type));
 }
 
 export function getTrending() {
-  return getMedia("/trending/all/week", "multi").then((items) =>
+  return getMedia("/trending/all/week", "multi", { include_adult: false }).then((items) =>
     items.filter((item) => item.type === "movie" || item.type === "tv")
   );
 }
 
 export function getPopularMovies() {
-  return getMedia("/movie/popular", "movie");
+  return getMedia("/movie/popular", "movie", { include_adult: false });
 }
 
 export function getPopularTv() {
-  return getMedia("/tv/popular", "tv");
+  return getMedia("/tv/popular", "tv", { include_adult: false });
 }
 
 export function getTopRated() {
-  return getMedia("/movie/top_rated", "movie");
+  return getMedia("/movie/top_rated", "movie", { include_adult: false });
 }
 
 export function getUpcoming() {
-  return getMedia("/movie/upcoming", "movie");
+  return getMedia("/movie/upcoming", "movie", { include_adult: false });
 }
