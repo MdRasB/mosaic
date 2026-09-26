@@ -1,13 +1,27 @@
 @media (max-width: 800px) {
+  body {
+    overflow: auto;
+  }
+
   .app-shell {
     display: block;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .app-content {
+    height: auto;
+    overflow: visible;
   }
 
   .sidebar {
     bottom: 0;
+    height: auto;
     box-shadow: var(--shadow-card);
     left: 0;
     max-width: 17rem;
+    overflow-y: auto;
     position: fixed;
     top: 0;
     transform: translateX(-100%);
