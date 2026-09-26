@@ -31,6 +31,10 @@ body {
   width: 100%;
 }
 
+.shell.explore-shell {
+  max-width: none;
+}
+
 .topbar, .section-heading, .card-footer, .button-row {
   align-items: center;
   display: flex;

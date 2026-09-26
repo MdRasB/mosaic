@@ -167,6 +167,7 @@ function bindRowControls(container) {
 }
 
 export async function renderExplorePage(container) {
+  container.classList.add("explore-shell");
   container.innerHTML = exploreMarkup();
   await Promise.all([loadFeatured(), ...sections.map(loadSection)]);
   bindRetryHandlers(container);
