@@ -43,6 +43,30 @@ The frontend entrypoint uses relative paths, so opening `frontend/` as the
 workspace in a generic Live Server also works. Do not open the repository root
 as the Live Server root because the frontend entrypoint is inside `frontend/`.
 
+### Cloudflare Pages deployment
+
+The frontend is a static Vite application. Configure the Cloudflare Pages
+project with:
+
+```text
+Production branch: deploy
+Root directory: frontend
+Build command: npm run build
+Build output directory: dist
+```
+
+Set this production environment variable in Cloudflare Pages:
+
+```text
+VITE_TMDB_API_KEY=your_tmdb_key
+```
+
+Cloudflare Pages runs the Vite build with that variable; do not upload
+`frontend/.env`, `frontend/config.js`, or any other credential file. The
+`deploy` branch is for deployment synchronization only. Application changes
+must be made on a `feature/<kebab-case-description>` or
+`fix/<kebab-case-description>` branch and merged into `main` first.
+
 ### Backend health endpoint
 
 The Go API is a small M00 foundation service:
