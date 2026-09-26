@@ -4,5 +4,5 @@
 @import url("./layout.css");
 @import url("./components.css");
 @import url("./pages.css");
-@import url("./responsive.css");
 @import url("../pages/explore/explore.css");
+@import url("./responsive.css");
