@@ -30,14 +30,16 @@ function escapeHtml(value) {
 function exploreMarkup() {
   return `
     <section class="explore-page" aria-labelledby="explore-title">
-      <div class="explore-intro">
-        <p class="eyebrow">Public discovery</p>
-        <h1 id="explore-title">Find your next <span>favorite world.</span></h1>
-        <p class="hero-copy">Browse what people are watching, discovering, and talking about right now.</p>
+      <div class="explore-hero">
+        <div class="explore-intro">
+          <p class="eyebrow">Public discovery</p>
+          <h1 id="explore-title">Find your next <span>favorite world.</span></h1>
+          <p class="hero-copy">Browse what people are watching, discovering, and talking about right now.</p>
+        </div>
+        <section class="featured-media" id="featured-media" aria-label="Featured media">
+          <div class="featured-loading">${loadingCards(1)}</div>
+        </section>
       </div>
-      <section class="featured-media" id="featured-media" aria-label="Featured media">
-        <div class="featured-loading">${loadingCards(1)}</div>
-      </section>
       <div class="explore-sections">
         ${sections.map(({ id, title }) => `
           <section class="media-section" aria-labelledby="${id}-title">
