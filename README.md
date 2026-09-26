@@ -11,7 +11,7 @@ docker compose up -d database
 docker compose ps
 ```
 
-The database is available at `localhost:5432`. Data is persisted in the
+By default, the database is available at `localhost:5432`; if `POSTGRES_PORT` is set in `.env`, connect using that host port.
 `mosaic-postgres-data` Docker volume. SQL files placed in `database/schema/`
 are applied automatically when the database volume is created.
 
