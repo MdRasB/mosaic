@@ -32,9 +32,20 @@ function exploreMarkup() {
     <section class="explore-page" aria-labelledby="explore-title">
       <div class="explore-hero">
         <div class="explore-intro">
-          <p class="eyebrow">Public discovery</p>
-          <h1 id="explore-title">Find your next <span>favorite world.</span></h1>
-          <p class="hero-copy">Browse what people are watching, discovering, and talking about right now.</p>
+          <div class="explore-intro-topline">
+            <p class="eyebrow">Public discovery</p>
+            <span>01 / 05</span>
+          </div>
+          <div class="explore-intro-heading">
+            <p class="explore-intro-kicker">Your next story</p>
+            <h1 id="explore-title">Stories worth <span>getting lost in.</span></h1>
+          </div>
+          <p class="hero-copy">Find films and series to match your mood, spark your curiosity, and stay with you long after the credits.</p>
+          <div class="explore-intro-footer" aria-label="Explore categories">
+            <span>Films</span>
+            <span>Series</span>
+            <span>New worlds</span>
+          </div>
         </div>
         <section class="featured-media" id="featured-media" aria-label="Featured media">
           <div class="featured-loading">${loadingCards(1)}</div>
