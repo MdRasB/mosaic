@@ -37,6 +37,13 @@ function restoreTheme() {
   setTheme(savedTheme === "light", { persist: false });
 }
 
+function setSidebarCollapsed(isCollapsed) {
+  sidebar.classList.toggle("sidebar-collapsed", isCollapsed);
+  appShell.classList.toggle("sidebar-is-collapsed", isCollapsed);
+  sidebarToggle.setAttribute("aria-expanded", String(!isCollapsed));
+  sidebarToggle.setAttribute("aria-label", isCollapsed ? "Expand sidebar" : "Collapse sidebar");
+}
+
 function renderPlaceholder(title) {
   content.innerHTML = `
     <section class="explore-state explore-state-empty page-placeholder">
@@ -62,10 +69,7 @@ sidebarToggle.addEventListener("click", () => {
     return;
   }
 
-  const isCollapsed = sidebar.classList.toggle("sidebar-collapsed");
-  appShell.classList.toggle("sidebar-is-collapsed", isCollapsed);
-  sidebarToggle.setAttribute("aria-expanded", String(!isCollapsed));
-  sidebarToggle.setAttribute("aria-label", isCollapsed ? "Expand sidebar" : "Collapse sidebar");
+  setSidebarCollapsed(!sidebar.classList.contains("sidebar-collapsed"));
 });
 
 // M05 authentication is not implemented yet; these controls document the planned public header.
@@ -85,6 +89,9 @@ navLinks.forEach((link) => {
 });
 
 restoreTheme();
+if (!window.matchMedia("(max-width: 800px)").matches) {
+  setSidebarCollapsed(true);
+}
 
 if (window.location.pathname === "/" || window.location.pathname === "/explore") {
   renderExplorePage(content);
