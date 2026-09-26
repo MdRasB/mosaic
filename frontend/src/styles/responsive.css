@@ -46,6 +46,10 @@
     grid-template-columns: 1fr;
   }
 
+  .media-row {
+    grid-auto-columns: minmax(9rem, 28vw);
+  }
+
   .section-heading {
     align-items: flex-start;
     flex-direction: column;
@@ -72,5 +76,14 @@
   .button-row {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .featured-media,
+  .featured-media-content {
+    min-height: 28rem;
+  }
+
+  .media-row {
+    grid-auto-columns: minmax(8.5rem, 42vw);
   }
 }

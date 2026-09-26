@@ -1,0 +1,214 @@
+.explore-page {
+  padding-bottom: var(--space-8);
+}
+
+.explore-intro {
+  padding: var(--space-6) 0 var(--space-5);
+}
+
+.explore-intro h1 {
+  max-width: 12ch;
+}
+
+.featured-media {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  isolation: isolate;
+  min-height: 24rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.featured-media-background {
+  background-color: var(--color-surface-raised);
+  background-image: linear-gradient(90deg, var(--color-bg) 0%, rgb(16 16 24 / 68%) 45%, rgb(16 16 24 / 20%) 100%), var(--featured-image);
+  background-position: center;
+  background-size: cover;
+  inset: 0;
+  position: absolute;
+  z-index: -1;
+}
+
+[data-theme] .featured-media-background {
+  background-image: linear-gradient(90deg, var(--color-bg) 0%, rgb(245 244 249 / 78%) 46%, rgb(245 244 249 / 25%) 100%), var(--featured-image);
+}
+
+.featured-media-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  max-width: 34rem;
+  min-height: 24rem;
+  padding: clamp(var(--space-5), 6vw, var(--space-8));
+}
+
+.featured-media-content h2 {
+  font-size: clamp(2rem, 5vw, 4rem);
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+.featured-media-content > p:not(.eyebrow) {
+  color: var(--color-muted);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.featured-meta {
+  align-items: center;
+  display: flex;
+  gap: var(--space-4);
+  margin: var(--space-4) 0 var(--space-5);
+}
+
+.explore-sections {
+  display: grid;
+  gap: var(--space-7);
+  padding-top: var(--space-8);
+}
+
+.media-section .section-heading {
+  margin-bottom: var(--space-4);
+}
+
+.section-status {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+.media-row {
+  display: grid;
+  gap: var(--space-4);
+  grid-auto-columns: 11rem;
+  grid-auto-flow: column;
+  grid-template-rows: 1fr;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: 0.25rem 0.25rem var(--space-3);
+  scrollbar-width: thin;
+}
+
+.page-placeholder {
+  margin-top: var(--space-8);
+}
+
+.media-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  min-width: 0;
+  overflow: hidden;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.media-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-4px);
+}
+
+.media-card-poster {
+  aspect-ratio: 2 / 3;
+  background: var(--color-surface-raised);
+  overflow: hidden;
+  position: relative;
+}
+
+.media-card-poster img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.media-card-fallback {
+  align-items: center;
+  color: var(--color-muted);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+}
+
+.media-card-type {
+  background: rgb(16 16 24 / 78%);
+  border-radius: 999px;
+  bottom: var(--space-2);
+  color: white;
+  font-size: 0.62rem;
+  font-weight: 800;
+  left: var(--space-2);
+  padding: 0.25rem 0.4rem;
+  position: absolute;
+}
+
+.media-card-content {
+  padding: var(--space-3);
+}
+
+.media-card-content h3 {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.media-card-meta {
+  color: var(--color-muted);
+  display: flex;
+  font-size: 0.75rem;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+}
+
+.media-rating {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.media-card-skeleton {
+  border: 0;
+  box-shadow: none;
+}
+
+.skeleton-poster, .skeleton-line {
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-poster {
+  aspect-ratio: 2 / 3;
+}
+
+.skeleton-line {
+  height: 0.7rem;
+  margin: var(--space-3) var(--space-2) 0;
+}
+
+.skeleton-line-title {
+  width: 75%;
+}
+
+.explore-state {
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  display: flex;
+  gap: var(--space-4);
+  justify-content: space-between;
+  min-height: 8rem;
+  padding: var(--space-5);
+}
+
+.explore-state-error {
+  border-color: color-mix(in srgb, var(--color-danger) 55%, var(--color-border));
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}

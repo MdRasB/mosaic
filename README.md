@@ -14,6 +14,18 @@ npm run dev
 
 Then open <http://localhost:5173>.
 
+For the public Explore page, from the repository root, add the TMDB key to
+`frontend/.env`:
+
+```bash
+cp frontend/.env.example frontend/.env
+# Set VITE_TMDB_API_KEY in frontend/.env.
+```
+
+Open <http://localhost:5173/explore> to browse live TMDB content. The key is
+bundled into the browser for this public V1 integration and must not be a
+Supabase secret or service-role key.
+
 The frontend entrypoint uses relative paths, so opening `frontend/` as the
 workspace in a generic Live Server also works. Do not open the repository root
 as the Live Server root because the frontend entrypoint is inside `frontend/`.
