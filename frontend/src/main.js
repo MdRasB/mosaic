@@ -10,6 +10,10 @@ const closeModalButton = document.querySelector("#close-modal");
 const cancelModalButton = document.querySelector("#cancel-modal");
 const confirmModalButton = document.querySelector("#confirm-modal");
 const loadingState = document.querySelector("#loading-state");
+const loginButton = document.querySelector("#login-button");
+const registerButton = document.querySelector("#register-button");
+const profileButton = document.querySelector("#profile-button");
+const navLinks = document.querySelectorAll(".nav-link-disabled");
 const searchInput = document.querySelector("#demo-search");
 const mediaTypeSelect = document.querySelector("#demo-select");
 const applyFiltersButton = document.querySelector("#apply-filters");
@@ -31,6 +35,11 @@ function showToast() {
   window.setTimeout(() => toast.classList.remove("toast-visible"), 2600);
 }
 
+function showMessage(message) {
+  toast.textContent = message;
+  showToast();
+}
+
 function closeModal() {
   modal.close();
 }
@@ -47,6 +56,13 @@ themeToggle.addEventListener("click", () => {
 toastTrigger.addEventListener("click", showToast);
 
 sidebarToggle.addEventListener("click", () => {
+  if (window.matchMedia("(max-width: 800px)").matches) {
+    const isOpen = sidebar.classList.toggle("sidebar-mobile-open");
+    sidebarToggle.setAttribute("aria-expanded", String(isOpen));
+    sidebarToggle.setAttribute("aria-label", isOpen ? "Close sidebar" : "Open sidebar");
+    return;
+  }
+
   const isCollapsed = sidebar.classList.toggle("sidebar-collapsed");
   appShell.classList.toggle("sidebar-is-collapsed", isCollapsed);
   sidebarToggle.setAttribute("aria-expanded", String(!isCollapsed));
@@ -58,8 +74,7 @@ closeModalButton.addEventListener("click", closeModal);
 cancelModalButton.addEventListener("click", closeModal);
 confirmModalButton.addEventListener("click", () => {
   closeModal();
-  toast.textContent = "Added to your collection.";
-  showToast();
+  showMessage("Added to your collection.");
 });
 
 modal.addEventListener("click", (event) => {
@@ -72,8 +87,7 @@ modal.addEventListener("click", (event) => {
 document.querySelector("#show-loading").addEventListener("click", () => {
   loadingState.classList.add("is-visible");
   window.setTimeout(() => loadingState.classList.remove("is-visible"), 1500);
-  toast.textContent = "Loading state preview complete.";
-  showToast();
+  showMessage("Loading state preview complete.");
 });
 
 applyFiltersButton.addEventListener("click", () => {
@@ -83,15 +97,25 @@ applyFiltersButton.addEventListener("click", () => {
     ? `${searchTerm || "All media"} · ${selectedType}`
     : selectedType;
 
-  toast.textContent = `Filters applied: ${filterDescription}`;
-  showToast();
+  showMessage(`Filters applied: ${filterDescription}`);
 });
 
 clearFiltersButton.addEventListener("click", () => {
   searchInput.value = "";
   mediaTypeSelect.value = "All media";
-  toast.textContent = "Filters cleared.";
-  showToast();
+  showMessage("Filters cleared.");
+});
+
+// M05 authentication is not implemented yet; these controls document the planned public header.
+loginButton.addEventListener("click", () => showMessage("Login will be available in Module M05."));
+registerButton.addEventListener("click", () => showMessage("Registration will be available in Module M05."));
+profileButton.addEventListener("click", () => showMessage("Profile will be available in Module M06."));
+
+navLinks.forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    showMessage("This navigation item is reserved for a future module.");
+  });
 });
 
 restoreTheme();
