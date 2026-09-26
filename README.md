@@ -36,8 +36,8 @@ cp frontend/config.example.js frontend/config.js
 # Set tmdbApiKey in frontend/config.js.
 ```
 
-Then open `frontend/index.html` through Live Server. The committed example
-files intentionally contain no credentials.
+Open the `frontend/` folder as the Live Server workspace, then browse to its
+root URL (usually `http://127.0.0.1:5500/`).
 
 The frontend entrypoint uses relative paths, so opening `frontend/` as the
 workspace in a generic Live Server also works. Do not open the repository root
