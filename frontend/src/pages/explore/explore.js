@@ -96,7 +96,7 @@ async function loadSection(section) {
 
   try {
     const items = await section.load();
-    row.innerHTML = items.length ? mediaRow(items.slice(0, 10)) : emptyState();
+    row.innerHTML = items.length ? mediaRow(items) : emptyState();
     status.textContent = items.length ? `${items.length} titles` : "No results";
   } catch (error) {
     setSectionError(section, "Could not load this section.");
