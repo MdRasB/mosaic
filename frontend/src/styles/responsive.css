@@ -1,0 +1,25 @@
+@media (max-width: 800px) {
+  .showcase-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .shell {
+    padding: var(--space-4);
+  }
+
+  .topbar {
+    margin-bottom: var(--space-6);
+  }
+
+  .button-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

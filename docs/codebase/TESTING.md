@@ -4,12 +4,13 @@
 
 ### 1) Test Stack and Commands
 
-- Primary test framework: [TODO] No test framework is configured.
+- Primary test framework: [TODO] No test framework is configured; the Vite production build is currently the available verification.
 - Assertion/mocking tools: [TODO]
 - Commands:
 
 ```bash
-[TODO] No test commands are configured.
+cd frontend
+npm run build
 ```
 
 ### 2) Test Layout
@@ -42,5 +43,5 @@
 
 - `Mosaic_Project_Complete_Plan_Final.md:2354-2415`
 - `Mosaic_Project_Complete_Plan_Final.md:3349-3394`
-- `README.md`
-- `.gitignore`
+- `frontend/package.json`
+- `frontend/src/main.js`

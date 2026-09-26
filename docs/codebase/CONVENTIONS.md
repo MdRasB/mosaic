@@ -7,8 +7,8 @@
 | Item | Rule | Example | Evidence |
 |---|---|---|---|
 | Files | [TODO] Planned lowercase JavaScript and Go filenames. | `router.js`, `main.go` | `Mosaic_Project_Complete_Plan_Final.md:1989-2077` |
-| Functions/methods | [TODO] | [TODO] | No source files exist; `README.md`, `.gitignore` |
-| Types/interfaces | [TODO] | [TODO] | No source files exist; `README.md`, `.gitignore` |
+| Functions/methods | camelCase | `themeToggle.addEventListener(...)` | `frontend/src/main.js` |
+| Types/interfaces | Not applicable in current JavaScript frontend | [TODO] | `frontend/src/main.js` |
 | Constants/env vars | Environment variables use the `VITE_` prefix for V1 browser configuration. | `VITE_TMDB_API_KEY` | `Mosaic_Project_Complete_Plan_Final.md:2194-2216` |
 
 ### 2) Formatting and Linting
@@ -40,5 +40,5 @@
 
 - `Mosaic_Project_Complete_Plan_Final.md:2272-2319`
 - `Mosaic_Project_Complete_Plan_Final.md:2194-2224`
-- `README.md`
-- `.gitignore`
+- `frontend/src/main.js`
+- `frontend/src/styles/*.css`

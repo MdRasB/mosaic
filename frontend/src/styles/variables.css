@@ -1,0 +1,40 @@
+:root {
+  color-scheme: dark;
+  --font-display: "Trebuchet MS", "Segoe UI", sans-serif;
+  --font-body: Inter, ui-sans-serif, system-ui, sans-serif;
+  --color-bg: #101018;
+  --color-surface: #191925;
+  --color-surface-raised: #222234;
+  --color-text: #f7f5ff;
+  --color-muted: #aaa8bd;
+  --color-border: #34334a;
+  --color-primary: #c7ff4a;
+  --color-primary-ink: #172000;
+  --color-secondary: #8d7aff;
+  --color-success: #72e2a0;
+  --color-danger: #ff8b9e;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --shadow-card: 0 1rem 3rem rgb(0 0 0 / 22%);
+}
+
+:root[data-theme] {
+  color-scheme: light;
+  --color-bg: #f5f4f9;
+  --color-surface: #ffffff;
+  --color-surface-raised: #eeecf5;
+  --color-text: #1e1d2b;
+  --color-muted: #656276;
+  --color-border: #d8d5e3;
+  --color-primary-ink: #253000;
+  --shadow-card: 0 1rem 3rem rgb(44 38 75 / 10%);
+}
