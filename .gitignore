@@ -1,2 +1,19 @@
-node_modules/
+# Sensitive Credentials
 .env
+secrets.json
+*.pem
+
+# Package Dependancy
+node_modules/
+venv/
+.venv/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Build Outputs
+dist/
+build/
+*.exe
+
