@@ -40,13 +40,17 @@ input {
   max-width: none;
 }
 
-.topbar, .section-heading, .card-footer, .button-row {
+.topbar,
+.section-heading,
+.card-footer,
+.button-row {
   align-items: center;
   display: flex;
   gap: var(--space-3);
 }
 
-.topbar, .section-heading {
+.topbar,
+.section-heading {
   justify-content: space-between;
 }
 
@@ -104,7 +108,14 @@ input {
   padding: 0.7rem var(--space-3);
 }
 
-.nav-link:hover, .nav-link.is-active {
+.sidebar-icon {
+  flex: 0 0 24px;
+  height: 24px;
+  width: 24px;
+}
+
+.nav-link:hover,
+.nav-link.is-active {
   background: var(--color-surface-raised);
   color: var(--color-text);
 }
@@ -179,17 +190,15 @@ input {
 }
 
 .brand-mark {
-  align-items: center;
-  background: var(--color-primary);
-  border-radius: var(--radius-sm);
-  color: var(--color-primary-ink);
-  display: inline-flex;
+  display: block;
+  flex: 0 0 2rem;
   height: 2rem;
-  justify-content: center;
+  object-fit: contain;
   width: 2rem;
 }
 
-.avatar-button, .icon-button {
+.avatar-button,
+.icon-button {
   border: 1px solid var(--color-border);
   cursor: pointer;
 }
@@ -213,7 +222,11 @@ input {
 }
 
 .hero-panel {
-  background: linear-gradient(120deg, var(--color-surface), var(--color-surface-raised));
+  background: linear-gradient(
+    120deg,
+    var(--color-surface),
+    var(--color-surface-raised)
+  );
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
