@@ -3,7 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Mosaic — Your interests. Your collection. Your world." />
+    <meta
+      name="description"
+      content="Mosaic — Your interests. Your collection. Your world."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon/mosaic-favicon.svg" />
     <title>Mosaic | Your world</title>
     <link rel="stylesheet" href="./src/styles/main.css" />
     <script src="./config.js"></script>
@@ -12,43 +16,179 @@
     <div class="app-shell">
       <aside class="sidebar" id="sidebar">
         <a class="brand sidebar-brand" href="/" aria-label="Mosaic home">
-          <span class="brand-mark" aria-hidden="true">M</span>
+          <img
+            class="brand-mark"
+            src="/icons/main-logo/mosaic-icon.svg"
+            alt=""
+            aria-hidden="true"
+          />
           <span class="sidebar-label">Mosaic</span>
         </a>
         <nav class="sidebar-nav" aria-label="Main navigation">
           <p class="nav-heading sidebar-label">Main</p>
-          <a class="nav-link is-active" href="/explore" aria-current="page"><span aria-hidden="true">◈</span><span class="sidebar-label">Explore</span></a>
+          <a class="nav-link is-active" href="/explore" aria-current="page"
+            ><img
+              class="sidebar-icon"
+              src="/icons/slidebar-icons/mosaic-explore.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span class="sidebar-label">Explore</span></a
+          >
           <p class="nav-heading sidebar-label">Media</p>
-          <a class="nav-link nav-link-disabled" href="#movies" aria-disabled="true"><span aria-hidden="true">▣</span><span class="sidebar-label">Movies</span></a>
-          <a class="nav-link nav-link-disabled" href="#tv" aria-disabled="true"><span aria-hidden="true">▤</span><span class="sidebar-label">TV Shows</span></a>
-          <a class="nav-link nav-link-disabled" href="#books" aria-disabled="true"><span aria-hidden="true">▥</span><span class="sidebar-label">Books</span></a>
+          <a
+            class="nav-link nav-link-disabled"
+            href="#movies"
+            aria-disabled="true"
+            ><img
+              class="sidebar-icon"
+              src="/icons/slidebar-icons/mosaic-movies.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span class="sidebar-label">Movies</span></a
+          >
+          <a class="nav-link nav-link-disabled" href="#tv" aria-disabled="true"
+            ><span aria-hidden="true">▤</span
+            ><span class="sidebar-label">TV Shows</span></a
+          >
+          <a
+            class="nav-link nav-link-disabled"
+            href="#books"
+            aria-disabled="true"
+            ><img
+              class="sidebar-icon"
+              src="/icons/slidebar-icons/mosaic-books.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span class="sidebar-label">Books</span></a
+          >
           <p class="nav-heading sidebar-label">My library</p>
-          <a class="nav-link nav-link-disabled" href="#collection" aria-disabled="true"><span aria-hidden="true">▦</span><span class="sidebar-label">Collection</span></a>
-          <a class="nav-link nav-link-disabled" href="#favorites" aria-disabled="true"><span aria-hidden="true">♡</span><span class="sidebar-label">Favorites</span></a>
-          <a class="nav-link nav-link-disabled" href="#watchlist" aria-disabled="true"><span aria-hidden="true">◷</span><span class="sidebar-label">Watchlist</span></a>
+          <a
+            class="nav-link nav-link-disabled"
+            href="#collection"
+            aria-disabled="true"
+            ><img
+              class="sidebar-icon"
+              src="/icons/slidebar-icons/mosaic-collection.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span class="sidebar-label">Collection</span></a
+          >
+          <a
+            class="nav-link nav-link-disabled"
+            href="#favorites"
+            aria-disabled="true"
+            ><img
+              class="sidebar-icon"
+              src="/icons/slidebar-icons/mosaic-favorites.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span class="sidebar-label">Favorites</span></a
+          >
+          <a
+            class="nav-link nav-link-disabled"
+            href="#watchlist"
+            aria-disabled="true"
+            ><img
+              class="sidebar-icon"
+              src="/icons/slidebar-icons/mosaic-watchlist.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span class="sidebar-label">Watchlist</span></a
+          >
           <p class="nav-heading sidebar-label">Account</p>
-          <a class="nav-link nav-link-disabled" href="#profile" aria-disabled="true"><span aria-hidden="true">○</span><span class="sidebar-label">Profile</span></a>
-          <a class="nav-link nav-link-disabled" href="#settings" aria-disabled="true"><span aria-hidden="true">⚙</span><span class="sidebar-label">Settings</span></a>
+          <a
+            class="nav-link nav-link-disabled"
+            href="#profile"
+            aria-disabled="true"
+            ><img
+              class="sidebar-icon"
+              src="/icons/slidebar-icons/mosaic-profile.svg"
+              alt=""
+              aria-hidden="true"
+            />
+            <span class="sidebar-label">Profile</span></a
+          >
+          <a
+            class="nav-link nav-link-disabled"
+            href="#settings"
+            aria-disabled="true"
+            ><span aria-hidden="true">⚙</span
+            ><span class="sidebar-label">Settings</span></a
+          >
         </nav>
       </aside>
-      <button class="sidebar-overlay" id="sidebar-overlay" type="button" aria-label="Close navigation menu"></button>
+      <button
+        class="sidebar-overlay"
+        id="sidebar-overlay"
+        type="button"
+        aria-label="Close navigation menu"
+      ></button>
 
       <div class="app-content">
         <header class="topbar">
-          <button class="icon-button" id="sidebar-toggle" type="button" aria-label="Expand sidebar" aria-expanded="false">☰</button>
+          <button
+            class="icon-button"
+            id="sidebar-toggle"
+            type="button"
+            aria-label="Expand sidebar"
+            aria-expanded="false"
+          >
+            ☰
+          </button>
           <a class="brand mobile-brand" href="/" aria-label="Mosaic home">
-            <span class="brand-mark" aria-hidden="true">M</span>
+            <img
+              class="brand-mark"
+              src="/icons/main-logo/mosaic-icon.svg"
+              alt=""
+              aria-hidden="true"
+            />
             <span>Mosaic</span>
           </a>
           <label class="search-field" for="global-search">
             <span aria-hidden="true">⌕</span>
-            <input id="global-search" type="search" placeholder="Search your world..." />
+            <input
+              id="global-search"
+              type="search"
+              placeholder="Search your world..."
+            />
           </label>
           <div class="topbar-actions">
-            <button class="button button-ghost" id="theme-toggle" type="button" aria-pressed="false">Use light theme</button>
-            <button class="button button-ghost topbar-auth-action" id="login-button" type="button">Login</button>
-            <button class="button button-primary topbar-auth-action" id="register-button" type="button">Register</button>
-            <button class="avatar-button" id="profile-button" type="button" aria-label="Open profile">MR</button>
+            <button
+              class="button button-ghost"
+              id="theme-toggle"
+              type="button"
+              aria-pressed="false"
+            >
+              Use light theme
+            </button>
+            <button
+              class="button button-ghost topbar-auth-action"
+              id="login-button"
+              type="button"
+            >
+              Login
+            </button>
+            <button
+              class="button button-primary topbar-auth-action"
+              id="register-button"
+              type="button"
+            >
+              Register
+            </button>
+            <button
+              class="avatar-button"
+              id="profile-button"
+              type="button"
+              aria-label="Open profile"
+            >
+              MR
+            </button>
           </div>
         </header>
 
@@ -56,19 +196,35 @@
       </div>
     </div>
 
-    <div class="toast" id="toast" role="status" aria-live="polite">Theme and component styles are ready.</div>
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      Theme and component styles are ready.
+    </div>
     <dialog class="modal" id="demo-modal" aria-labelledby="modal-title">
       <div class="modal-header">
         <div>
           <p class="eyebrow">Reusable modal</p>
           <h2 id="modal-title">Add to your collection</h2>
         </div>
-        <button class="icon-button" id="close-modal" type="button" aria-label="Close modal">×</button>
+        <button
+          class="icon-button"
+          id="close-modal"
+          type="button"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
       </div>
-      <p class="muted">This dialog provides a consistent surface for confirmations, forms, and media actions.</p>
+      <p class="muted">
+        This dialog provides a consistent surface for confirmations, forms, and
+        media actions.
+      </p>
       <div class="modal-actions">
-        <button class="button button-ghost" id="cancel-modal" type="button">Cancel</button>
-        <button class="button button-primary" id="confirm-modal" type="button">Confirm</button>
+        <button class="button button-ghost" id="cancel-modal" type="button">
+          Cancel
+        </button>
+        <button class="button button-primary" id="confirm-modal" type="button">
+          Confirm
+        </button>
       </div>
     </dialog>
     <script type="module" src="./src/main.js"></script>
