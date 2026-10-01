@@ -180,6 +180,19 @@ input {
   width: 100%;
 }
 
+.search-submit {
+  background: transparent;
+  border: 0;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.5rem 0;
+}
+
+.search-submit:hover {
+  color: var(--color-text);
+}
+
 .brand {
   align-items: center;
   display: inline-flex;

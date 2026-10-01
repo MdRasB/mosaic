@@ -1,4 +1,5 @@
 import { renderExplorePage } from "./pages/explore/explore.js";
+import { renderSearchPage } from "./pages/search/search.js";
 
 const themeToggle = document.querySelector("#theme-toggle");
 const appShell = document.querySelector(".app-shell");
@@ -12,6 +13,8 @@ const profileButton = document.querySelector("#profile-button");
 const navLinks = document.querySelectorAll(".nav-link-disabled");
 const themeStorageKey = "mosaic-theme";
 const content = document.querySelector("#app-content");
+const searchForm = document.querySelector("#global-search-form");
+const searchInput = document.querySelector("#global-search");
 
 function setTheme(isLight, { persist = true } = {}) {
   document.documentElement.toggleAttribute("data-theme", isLight);
@@ -58,6 +61,29 @@ function renderPlaceholder(title) {
   `;
 }
 
+function renderRoute() {
+  const path = window.location.pathname;
+  const params = new URLSearchParams(window.location.search);
+
+  if (path === "/" || path === "/explore") {
+    renderExplorePage(content);
+  } else if (path === "/search") {
+    const query = params.get("q")?.trim();
+
+    if (!query) {
+      renderPlaceholder("Search for a movie or TV show.");
+      return;
+    }
+
+    searchInput.value = query;
+    renderSearchPage(content, query, params.get("type"));
+  } else if (path.startsWith("/media/")) {
+    renderPlaceholder("Media details are coming in Module M04.");
+  } else {
+    renderPlaceholder("This page is not available yet.");
+  }
+}
+
 themeToggle.addEventListener("click", () => {
   setTheme(!document.documentElement.hasAttribute("data-theme"));
 });
@@ -95,6 +121,21 @@ navLinks.forEach((link) => {
     event.preventDefault();
     showMessage("This navigation item is reserved for a future module.");
   });
+
+  searchForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const query = searchInput.value.trim();
+
+    if (!query) {
+      showMessage("Enter a title to start searching.");
+      return;
+    }
+
+    window.history.pushState({}, "", `/search?q=${encodeURIComponent(query)}`);
+    renderRoute();
+  });
+
+  window.addEventListener("popstate", renderRoute);
 });
 
 restoreTheme();
@@ -102,10 +143,4 @@ if (!window.matchMedia("(max-width: 800px)").matches) {
   setSidebarCollapsed(true);
 }
 
-if (window.location.pathname === "/" || window.location.pathname === "/explore") {
-  renderExplorePage(content);
-} else if (window.location.pathname.startsWith("/media/")) {
-  renderPlaceholder("Media details are coming in Module M04.");
-} else {
-  renderPlaceholder("This page is not available yet.");
-}
+renderRoute();
