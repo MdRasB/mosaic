@@ -150,14 +150,16 @@
             />
             <span>Mosaic</span>
           </a>
-          <label class="search-field" for="global-search">
+          <form class="search-field" id="global-search-form" role="search">
             <span aria-hidden="true">⌕</span>
             <input
               id="global-search"
               type="search"
               placeholder="Search your world..."
+              aria-label="Search movies and TV shows"
             />
-          </label>
+            <button class="search-submit" type="submit" aria-label="Submit search">↵</button>
+          </form>
           <div class="topbar-actions">
             <button
               class="button button-ghost"
