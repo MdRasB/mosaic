@@ -127,3 +127,32 @@ export function getTopRated() {
 export function getUpcoming() {
   return getMedia("/movie/upcoming", "movie", { include_adult: false });
 }
+
+export async function searchMedia(query, page = 1) {
+  const data = await request("/search/multi", {
+    query,
+    page,
+    include_adult: false
+  });
+  const seen = new Set();
+  const items = (data.results ?? [])
+    .filter((item) => item.media_type === "movie" || item.media_type === "tv")
+    .filter((item) => {
+      const key = `${item.media_type}:${item.id}`;
+
+      if (seen.has(key) || isRestrictedContent(item)) {
+        return false;
+      }
+
+      seen.add(key);
+      return true;
+    })
+    .map((item) => normalizeMedia(item, "multi"));
+
+  return {
+    items,
+    page: data.page ?? page,
+    totalPages: data.total_pages ?? page,
+    totalResults: data.total_results ?? 0
+  };
+}
