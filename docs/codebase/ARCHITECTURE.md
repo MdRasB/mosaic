@@ -38,9 +38,10 @@ Evidence: `Mosaic_Project_Complete_Plan_Final.md:687-771`, `2039-2077`.
 
 ### 5) Known Architectural Risks
 
-- The architecture is specified but not implemented; boundaries can drift once coding begins.
 - Browser-exposed Vite variables are public by design; secret keys must never be placed there.
-- [TODO] Error, retry, timeout, and observability behavior is not implemented.
+- Explore and search implement loading, empty, error, and retry states. The Go
+  foundation still needs request logging and feature-specific observability as
+  server-side modules are added.
 
 ### 6) Evidence
 

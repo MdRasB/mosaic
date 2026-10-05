@@ -13,28 +13,36 @@
 
 ### 2) Formatting and Linting
 
-- Formatter: [TODO] No formatter configured.
-- Linter: [TODO] No linter configured.
-- Most relevant enforced rules: [TODO]
-- Run commands: [TODO]
+- Formatter: No formatter configured; preserve the existing two-space
+  JavaScript/CSS style and run `gofmt` for Go files.
+- Linter: No project linter configured.
+- Most relevant enforced rules: `npm run build`, `git diff --check`, and
+  `gofmt`/`go test ./...` for backend changes.
+- Run commands: `cd frontend && npm run build`; `cd backend && go test ./...`.
 
 ### 3) Import and Module Conventions
 
-- Import grouping/order: [TODO]
-- Alias vs relative import policy: [TODO]
-- Public exports/barrel policy: [TODO]
+- Import grouping/order: explicit relative imports at the top of each module.
+- Alias vs relative import policy: relative paths; no alias configuration.
+- Public exports/barrel policy: modules export named functions directly; no
+  barrel files are currently used.
 
 ### 4) Error and Logging Conventions
 
-- Error strategy by layer: The plan requires explicit loading, empty, API-failure, and database-failure states; implementation is pending.
-- Logging style and required context fields: [TODO]
+- Error strategy by layer: frontend pages render explicit loading, empty,
+  API-failure, and retry states; backend handlers return HTTP errors and log
+  startup failures.
+- Logging style and required context fields: contextual `console.error` in
+  frontend failures and standard Go `log` for the current API foundation.
 - Sensitive-data redaction rules: Supabase secret/service-role keys must remain server-side.
 
 ### 5) Testing Conventions
 
-- Test file naming/location rule: Planned backend tests are under `backend/tests/`; frontend convention is [TODO].
-- Mocking strategy norm: [TODO]
-- Coverage expectation: [TODO]
+- Test file naming/location rule: Go tests use `_test.go` beside the package;
+  frontend tests are not configured.
+- Mocking strategy norm: use `httptest` for HTTP boundaries and avoid external
+  services in tests.
+- Coverage expectation: no threshold currently configured.
 
 ### 6) Evidence
 

@@ -7,7 +7,7 @@
 | Area | Value | Evidence |
 |------|-------|----------|
 | Primary language | Vanilla JavaScript ES modules | `frontend/src/main.js` |
-| Runtime + version | Node.js runtime for Vite tooling; version not pinned | `frontend/package.json` |
+| Runtime + version | Node.js runtime for Vite tooling; Vite 7 requires Node 20.19+ or 22.12+ | `frontend/package-lock.json` |
 | Package manager | npm | `frontend/package-lock.json` |
 | Module/build system | Vite | `frontend/package.json`, `frontend/vite.config.js` |
 
@@ -39,8 +39,10 @@ npm run preview
 
 ### 5) Environment and Config
 
-- Config sources: Root `.env.example` for database; frontend has no runtime secrets yet.
-- Required env vars: `VITE_TMDB_API_KEY` is used by M02; Supabase variables remain pending for M05+.
+- Config sources: Root `.env.example` for database, `frontend/.env.example` for
+  Vite, and ignored `frontend/config.js` for Live Server.
+- Required env vars: `VITE_TMDB_API_KEY` is used by Explore/search; Supabase
+  variables remain pending for M05+.
 - Deployment/runtime constraints: Release 1 is planned for Cloudflare Pages, Supabase, and TMDB; Go/Render is optional later.
 
 ### 6) Evidence

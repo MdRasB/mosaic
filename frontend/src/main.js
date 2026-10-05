@@ -11,7 +11,7 @@ const sidebarOverlay = document.querySelector("#sidebar-overlay");
 const loginButton = document.querySelector("#login-button");
 const registerButton = document.querySelector("#register-button");
 const profileButton = document.querySelector("#profile-button");
-const navLinks = document.querySelectorAll(".nav-link-disabled");
+const navLinks = document.querySelectorAll(".nav-link");
 const themeStorageKey = "mosaic-theme";
 const content = document.querySelector("#app-content");
 const searchForm = document.querySelector("#global-search-form");
@@ -60,6 +60,24 @@ function renderPlaceholder(title) {
       <a class="button button-primary" href="/explore">Back to Explore</a>
     </section>
   `;
+}
+
+function isCurrentNavigationTarget(link) {
+  const target = new URL(link.href, window.location.origin);
+  const currentPath = window.location.pathname;
+  const targetPath = target.pathname;
+  const currentExplore = currentPath === "/" || currentPath === "/explore";
+  const targetExplore = targetPath === "/" || targetPath === "/explore";
+
+  if (currentExplore && targetExplore) {
+    return true;
+  }
+
+  return (
+    targetPath === currentPath &&
+    target.search === window.location.search &&
+    target.hash === window.location.hash
+  );
 }
 
 function renderRoute() {
@@ -120,6 +138,17 @@ profileButton.addEventListener("click", () => showMessage("Profile will be avail
 
 navLinks.forEach((link) => {
   link.addEventListener("click", (event) => {
+    if (!link.classList.contains("nav-link-disabled") && isCurrentNavigationTarget(link)) {
+      event.preventDefault();
+      const label = link.textContent.trim().replace(/\s+/g, " ");
+      showMessage(`You are already viewing ${label}.`);
+      return;
+    }
+
+    if (!link.classList.contains("nav-link-disabled")) {
+      return;
+    }
+
     event.preventDefault();
     showMessage("This navigation item is reserved for a future module.");
   });

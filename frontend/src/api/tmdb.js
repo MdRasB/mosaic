@@ -87,7 +87,12 @@ async function getMedia(path, type, params = {}) {
       const itemType = type === "multi" ? item.media_type : type;
       const key = `${itemType}:${item.id}`;
 
-      if (!itemType || seen.has(key) || isRestrictedContent(item)) {
+      if (
+        !itemType ||
+        (type === "multi" && itemType !== "movie" && itemType !== "tv") ||
+        seen.has(key) ||
+        isRestrictedContent(item)
+      ) {
         continue;
       }
 
