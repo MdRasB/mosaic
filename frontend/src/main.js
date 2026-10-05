@@ -1,3 +1,4 @@
+import { createSearchSuggestions } from "./components/search/search-suggestions.js";
 import { renderExplorePage } from "./pages/explore/explore.js";
 import { renderSearchPage } from "./pages/search/search.js";
 
@@ -75,6 +76,7 @@ function renderRoute() {
       return;
     }
 
+    searchSuggestions.close();
     searchInput.value = query;
     renderSearchPage(content, query, params.get("type"));
   } else if (path.startsWith("/media/")) {
@@ -121,21 +123,35 @@ navLinks.forEach((link) => {
     event.preventDefault();
     showMessage("This navigation item is reserved for a future module.");
   });
+});
 
-  searchForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const query = searchInput.value.trim();
+function submitSearchQuery(rawQuery) {
+  const query = rawQuery.trim();
 
-    if (!query) {
-      showMessage("Enter a title to start searching.");
-      return;
-    }
+  if (!query) {
+    showMessage("Enter a title to start searching.");
+    return;
+  }
 
-    window.history.pushState({}, "", `/search?q=${encodeURIComponent(query)}`);
-    renderRoute();
-  });
+  searchInput.value = query;
+  window.history.pushState({}, "", `/search?q=${encodeURIComponent(query)}`);
+  renderRoute();
+}
 
-  window.addEventListener("popstate", renderRoute);
+const searchSuggestions = createSearchSuggestions({
+  input: searchInput,
+  form: searchForm,
+  onSelect: (item) => submitSearchQuery(item.title)
+});
+
+searchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  submitSearchQuery(searchInput.value);
+});
+
+window.addEventListener("popstate", () => {
+  searchSuggestions.close();
+  renderRoute();
 });
 
 restoreTheme();
