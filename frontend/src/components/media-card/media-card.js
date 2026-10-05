@@ -1,14 +1,5 @@
 import { imageUrl } from "../../api/tmdb.js";
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[character]);
-}
+import { escapeHtml } from "../../utils/escape-html.js";
 
 function getYear(date) {
   return date ? new Date(`${date}T00:00:00`).getFullYear() : "—";

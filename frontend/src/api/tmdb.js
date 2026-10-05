@@ -4,6 +4,7 @@ const responseCache = new Map();
 const restrictedContentPattern = /\b(?:adult|bondage|erotic|xxx|porn(?:ographic)?|sex(?:ual)?|nude|nudity|intercourse|fetish|lust)\b/i;
 const TARGET_ROW_SIZE = 20;
 const MAX_PAGES_PER_SECTION = 5;
+const SUGGESTION_LIMIT = 8;
 
 function getApiKey() {
   const apiKey = import.meta.env?.VITE_TMDB_API_KEY || window.MOSAIC_CONFIG?.tmdbApiKey;
@@ -126,6 +127,37 @@ export function getTopRated() {
 
 export function getUpcoming() {
   return getMedia("/movie/upcoming", "movie", { include_adult: false });
+}
+
+export async function searchSuggestions(query, limit = SUGGESTION_LIMIT) {
+  const data = await request("/search/multi", {
+    query,
+    page: 1,
+    include_adult: false
+  });
+  const seen = new Set();
+  const items = [];
+
+  for (const item of data.results ?? []) {
+    if (items.length >= limit) {
+      break;
+    }
+
+    if (item.media_type !== "movie" && item.media_type !== "tv") {
+      continue;
+    }
+
+    const key = `${item.media_type}:${item.id}`;
+
+    if (seen.has(key) || isRestrictedContent(item)) {
+      continue;
+    }
+
+    seen.add(key);
+    items.push(normalizeMedia(item, "multi"));
+  }
+
+  return items;
 }
 
 export async function searchMedia(query, page = 1) {

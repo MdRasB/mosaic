@@ -1,22 +1,13 @@
 import { searchMedia } from "../../api/tmdb.js";
 import { emptyState, errorState } from "../../components/empty-state/empty-state.js";
 import { loadingCards, mediaRow } from "../../components/media-row/media-row.js";
+import { escapeHtml } from "../../utils/escape-html.js";
 
 const filters = [
   { id: "all", label: "All" },
   { id: "movie", label: "Movies" },
   { id: "tv", label: "TV Shows" }
 ];
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[character]);
-}
 
 function normalizeFilter(value) {
   return filters.some((filter) => filter.id === value) ? value : "all";
