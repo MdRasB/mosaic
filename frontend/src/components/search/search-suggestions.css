@@ -1,0 +1,97 @@
+.search-suggestions {
+  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--color-surface-raised) 96%, transparent);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  left: 0;
+  list-style: none;
+  margin: 0;
+  max-height: min(24rem, 60vh);
+  overflow-y: auto;
+  padding: var(--space-2);
+  position: absolute;
+  right: 0;
+  scrollbar-color: var(--color-border) transparent;
+  scrollbar-width: thin;
+  text-align: left;
+  top: calc(100% + var(--space-2));
+  z-index: 6;
+}
+
+.search-suggestions[hidden] {
+  display: none;
+}
+
+.search-suggestion {
+  align-items: center;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-2);
+}
+
+.search-suggestion:hover,
+.search-suggestion.is-active {
+  background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+}
+
+.search-suggestion-poster {
+  align-items: center;
+  aspect-ratio: 2 / 3;
+  background: var(--color-surface);
+  border-radius: calc(var(--radius-sm) / 2);
+  display: flex;
+  flex: 0 0 2.25rem;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.search-suggestion-poster img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.search-suggestion-poster-fallback {
+  color: var(--color-muted);
+  font-size: 0.55rem;
+  font-weight: 800;
+  line-height: 1.1;
+  padding: 0.15rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.search-suggestion-text {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.search-suggestion-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-suggestion-match {
+  background: color-mix(in srgb, var(--color-primary) 22%, transparent);
+  border-radius: 0.2rem;
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+[data-theme] .search-suggestion-match {
+  background: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  color: var(--color-primary-ink);
+}
+
+.search-suggestion-meta {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}

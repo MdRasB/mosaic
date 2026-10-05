@@ -167,6 +167,7 @@ input {
   margin: 0 auto;
   max-width: 32rem;
   padding: 0 var(--space-4);
+  position: relative;
   width: 100%;
 }
 

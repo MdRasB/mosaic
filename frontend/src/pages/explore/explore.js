@@ -8,6 +8,7 @@ import {
 } from "../../api/tmdb.js";
 import { emptyState, errorState } from "../../components/empty-state/empty-state.js";
 import { loadingCards, mediaRow } from "../../components/media-row/media-row.js";
+import { escapeHtml } from "../../utils/escape-html.js";
 
 const sections = [
   { id: "trending", title: "Trending now", load: getTrending },
@@ -16,16 +17,6 @@ const sections = [
   { id: "top-rated", title: "Top rated", load: getTopRated },
   { id: "upcoming", title: "Upcoming", load: getUpcoming }
 ];
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[character]);
-}
 
 function exploreMarkup() {
   return `
