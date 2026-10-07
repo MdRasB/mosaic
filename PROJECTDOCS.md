@@ -397,11 +397,11 @@ as editable placeholders so the team can add the correct information later.
 
 | Member | ID | Responsibility |
 |---|---:|---|
-| **[Team member 1]** | [ID] | Project lead, planning, module coordination, release tracking |
-| **[Team member 2]** | [ID] | Frontend shell, responsive UI, visual design, accessibility |
-| **[Team member 3]** | [ID] | TMDB/provider integrations, API normalization, content-safety rules |
-| **[Team member 4]** | [ID] | Go backend, Docker/PostgreSQL foundation, future server boundaries |
-| **[Team member 5]** | [ID] | Testing, documentation, deployment verification, quality review |
+| **Muhammad Rasek Biswas** | 39 | Project lead, planning, backend, release |
+| **Md. Ashikur Rifat** | 40 | Frontend shell, responsive UI, visual design, accessibility |
+| **Md. Migdadur Rahman Khan** | 46 | TMDB/provider integrations, testing |
+| **Md. Abirul Alam Apurbo** | 59 | Frontend, image/icon generation, future server boundaries, visual design |
+| **Rafiur Rahman** | 62 | Testing, documentation, deployment verification, quality review |
 
 ### Responsibility boundaries
 
