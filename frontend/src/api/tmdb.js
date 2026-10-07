@@ -33,13 +33,29 @@ async function request(path, params = {}) {
     return responseCache.get(cacheKey);
   }
 
-  const requestPromise = fetch(url).then(async (response) => {
-    if (!response.ok) {
-      throw new Error(`TMDB request failed with status ${response.status}.`);
-    }
+  const requestPromise = fetch(url)
+    .then(async (response) => {
+      if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error("TMDB rate limit reached. Too many requests; please wait a moment before trying again.");
+        }
+        if (response.status === 401 || response.status === 403) {
+          throw new Error("TMDB API key is invalid or unauthorized.");
+        }
+        if (response.status === 404) {
+          throw new Error("Requested content was not found on TMDB.");
+        }
+        throw new Error(`TMDB request failed with status ${response.status}.`);
+      }
 
-    return response.json();
-  });
+      return response.json();
+    })
+    .catch((error) => {
+      if (error instanceof TypeError && error.message.toLowerCase().includes("fetch")) {
+        throw new Error("Network connection error. Please check your internet connection.");
+      }
+      throw error;
+    });
 
   responseCache.set(cacheKey, requestPromise.catch((error) => {
     responseCache.delete(cacheKey);
@@ -64,15 +80,25 @@ function isRestrictedContent(item) {
 }
 
 export function normalizeMedia(item, type) {
+  const mediaType = type === "multi" ? item.media_type : type;
+  const overview = item.overview ?? "";
+
   return {
     id: item.id,
-    type: type === "multi" ? item.media_type : type,
+    type: mediaType,
     title: item.title ?? item.name ?? "Untitled",
+    overview,
+    description: overview,
     posterPath: item.poster_path,
+    posterUrl: imageUrl(item.poster_path, "w342"),
     backdropPath: item.backdrop_path,
+    backdropUrl: imageUrl(item.backdrop_path, "w1280"),
     releaseDate: item.release_date ?? item.first_air_date ?? "",
     rating: Number(item.vote_average ?? 0),
-    overview: item.overview ?? ""
+    voteCount: Number(item.vote_count ?? 0),
+    language: item.original_language ?? "",
+    genreIds: item.genre_ids ?? [],
+    source: "tmdb"
   };
 }
 
@@ -87,7 +113,12 @@ async function getMedia(path, type, params = {}) {
       const itemType = type === "multi" ? item.media_type : type;
       const key = `${itemType}:${item.id}`;
 
-      if (!itemType || seen.has(key) || isRestrictedContent(item)) {
+      if (
+        !itemType ||
+        (type === "multi" && itemType !== "movie" && itemType !== "tv") ||
+        seen.has(key) ||
+        isRestrictedContent(item)
+      ) {
         continue;
       }
 

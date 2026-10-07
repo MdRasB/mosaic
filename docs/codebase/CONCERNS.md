@@ -6,43 +6,43 @@
 
 | Severity | Concern | Evidence | Impact | Suggested action |
 |---|---|---|---|---|
-| high | The repository has no runnable application or configured dependencies yet. | `README.md`, `.gitignore` | Foundation work cannot be verified until initialized. | Implement M00 in a follow-up change. |
-| high | Browser-exposed credentials must not include Supabase secret/service-role keys. | `Mosaic_Project_Complete_Plan_Final.md:185-201`, `2194-2216` | Credential exposure could bypass RLS. | Add env templates and review configuration before auth/data work. |
+| high | Browser-exposed credentials must not include Supabase secret/service-role keys. | `frontend/src/api/tmdb.js`, `README.md` | Credential exposure could bypass RLS. | Keep only publishable TMDB configuration in the browser; add server-side boundaries before auth/data work. |
 | medium | External API terms, quotas, provider links, and free-tier limits can change. | `Mosaic_Project_Complete_Plan_Final.md:1345-1347`, `2248-2267` | Deployment or provider behavior may change. | Re-check official terms before implementation and deployment. |
 
 ### 2) Technical Debt
 
 | Debt item | Why it exists | Where | Risk if ignored | Suggested fix |
 |---|---|---|---|---|
-| No implementation baseline | Repository is at the structure-only stage. | Repository root | Features cannot be developed consistently. | Initialize Vite, environment handling, and the application shell. |
+| Browser-only API integration | The current public V1 calls TMDB from the frontend. | `frontend/src/api/tmdb.js` | The TMDB key is observable and provider quotas apply per client. | Move protected/provider-sensitive requests behind Go when server-side features require them. |
 
 ### 3) Security Concerns
 
 | Risk | OWASP category | Evidence | Current mitigation | Gap |
 |---|---|---|---|---|
-| Misuse of browser-visible credentials | A05 | `Mosaic_Project_Complete_Plan_Final.md:185-201`, `2194-2216` | Plan distinguishes publishable and secret keys. | No env/config or RLS implementation exists yet. |
-| Missing server-side admin enforcement | A01 | `Mosaic_Project_Complete_Plan_Final.md:1801-1809` | Plan requires server-side/strong database policies. | Admin controls are not implemented. |
+| Misuse of browser-visible credentials | A05 | `frontend/src/api/tmdb.js`, `README.md` | TMDB uses publishable browser configuration; no Supabase secret is exposed. | RLS and protected server-side data access are not implemented yet. |
+| Missing server-side admin enforcement | A01 | Planned auth/data modules | Plan requires server-side/strong database policies. | Admin controls are not implemented until those modules are added. |
 
 ### 4) Performance and Scaling Concerns
 
 | Concern | Evidence | Current symptom | Scaling risk | Suggested improvement |
 |---|---|---|---|---|
-| No implementation or performance baseline | `README.md`, `.gitignore` | No measurable runtime behavior. | Unknown until features exist. | Add targeted performance checks with relevant modules. |
+| Browser API request volume | `frontend/src/api/tmdb.js`, `frontend/src/components/search/search-suggestions.js` | Explore rows paginate to safe titles and suggestions debounce input. | Provider quotas can still be reached by many users. | Keep caching/debouncing and add server-side controls if traffic grows. |
 
 ### 5) Fragile/High-Churn Areas
 
 | Area | Why fragile | Churn signal | Safe change strategy |
 |---|---|---|---|
-| `.gitignore`, `README.md` | Only files with recent history. | Scan reports 2 and 1 commits respectively. | Preserve existing user changes; update only when foundation needs it. |
+| Frontend/API boundary | Pages consume normalized TMDB objects through `api/tmdb.js`. | M03 added search and suggestions. | Preserve the API normalization boundary as modules expand. |
 
 ### 6) `[ASK USER]` Questions
 
-1. [ASK USER] Should the optional Go skeleton be initialized now in M00, or remain directory-only until a server-side feature requires it?
-2. [ASK USER] Should the planned documentation files under `docs/` be created in the next implementation step, or maintained separately from the repository?
+No blocking architecture question is currently open. Authentication, database
+policies, and server-side provider boundaries remain intentionally deferred to
+their planned modules.
 
 ### 7) Evidence
 
 - `README.md`
-- `.gitignore`
-- `Mosaic_Project_Complete_Plan_Final.md:1769-1809`
-- `Mosaic_Project_Complete_Plan_Final.md:2194-2267`
+- `frontend/src/api/tmdb.js`
+- `frontend/src/components/search/search-suggestions.js`
+- `backend/cmd/api/main.go`

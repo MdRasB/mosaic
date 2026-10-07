@@ -1,6 +1,7 @@
 import { createSearchSuggestions } from "./components/search/search-suggestions.js";
 import { renderExplorePage } from "./pages/explore/explore.js";
-import { renderSearchPage } from "./pages/search/search.js";
+import { renderSearchLanding, renderSearchPage } from "./pages/search/search.js";
+import { saveRecentSearch } from "./utils/recent-searches.js";
 
 const themeToggle = document.querySelector("#theme-toggle");
 const appShell = document.querySelector(".app-shell");
@@ -11,7 +12,7 @@ const sidebarOverlay = document.querySelector("#sidebar-overlay");
 const loginButton = document.querySelector("#login-button");
 const registerButton = document.querySelector("#register-button");
 const profileButton = document.querySelector("#profile-button");
-const navLinks = document.querySelectorAll(".nav-link-disabled");
+const navLinks = document.querySelectorAll(".nav-link");
 const themeStorageKey = "mosaic-theme";
 const content = document.querySelector("#app-content");
 const searchForm = document.querySelector("#global-search-form");
@@ -62,6 +63,24 @@ function renderPlaceholder(title) {
   `;
 }
 
+function isCurrentNavigationTarget(link) {
+  const target = new URL(link.href, window.location.origin);
+  const currentPath = window.location.pathname;
+  const targetPath = target.pathname;
+  const currentExplore = currentPath === "/" || currentPath === "/explore";
+  const targetExplore = targetPath === "/" || targetPath === "/explore";
+
+  if (currentExplore && targetExplore) {
+    return true;
+  }
+
+  return (
+    targetPath === currentPath &&
+    target.search === window.location.search &&
+    target.hash === window.location.hash
+  );
+}
+
 function renderRoute() {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
@@ -71,14 +90,16 @@ function renderRoute() {
   } else if (path === "/search") {
     const query = params.get("q")?.trim();
 
+    searchSuggestions.close();
+
     if (!query) {
-      renderPlaceholder("Search for a movie or TV show.");
+      searchInput.value = "";
+      renderSearchLanding(content);
       return;
     }
 
-    searchSuggestions.close();
     searchInput.value = query;
-    renderSearchPage(content, query, params.get("type"));
+    renderSearchPage(content, query, params.get("type"), params.get("sort"));
   } else if (path.startsWith("/media/")) {
     renderPlaceholder("Media details are coming in Module M04.");
   } else {
@@ -120,6 +141,17 @@ profileButton.addEventListener("click", () => showMessage("Profile will be avail
 
 navLinks.forEach((link) => {
   link.addEventListener("click", (event) => {
+    if (!link.classList.contains("nav-link-disabled") && isCurrentNavigationTarget(link)) {
+      event.preventDefault();
+      const label = link.textContent.trim().replace(/\s+/g, " ");
+      showMessage(`You are already viewing ${label}.`);
+      return;
+    }
+
+    if (!link.classList.contains("nav-link-disabled")) {
+      return;
+    }
+
     event.preventDefault();
     showMessage("This navigation item is reserved for a future module.");
   });
@@ -133,6 +165,7 @@ function submitSearchQuery(rawQuery) {
     return;
   }
 
+  saveRecentSearch(query);
   searchInput.value = query;
   window.history.pushState({}, "", `/search?q=${encodeURIComponent(query)}`);
   renderRoute();

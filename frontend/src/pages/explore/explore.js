@@ -73,59 +73,78 @@ function featuredMarkup(media) {
   `;
 }
 
-function setSectionError(section, message) {
-  document.querySelector(`#${section.id}-row`).innerHTML = errorState(message, section.id);
-  document.querySelector(`#${section.id}-status`).textContent = "Unavailable";
+function setSectionError(section, container, message) {
+  container.querySelector(`#${section.id}-row`).innerHTML = errorState(message, section.id);
+  container.querySelector(`#${section.id}-status`).textContent = "Unavailable";
 }
 
-async function loadSection(section) {
-  const row = document.querySelector(`#${section.id}-row`);
-  const status = document.querySelector(`#${section.id}-status`);
+async function loadSection(section, container, renderToken) {
+  const row = container.querySelector(`#${section.id}-row`);
+  const status = container.querySelector(`#${section.id}-status`);
 
   row.innerHTML = loadingCards();
   status.textContent = "Loading";
 
   try {
     const items = await section.load();
+    if (container.exploreRenderToken !== renderToken) {
+      return;
+    }
+
     row.innerHTML = items.length ? mediaRow(items) : emptyState();
     status.textContent = items.length ? `${items.length} titles` : "No results";
   } catch (error) {
-    setSectionError(section, "Could not load this section.");
+    if (container.exploreRenderToken !== renderToken) {
+      return;
+    }
+
+    setSectionError(section, container, "Could not load this section.");
     console.error(`Unable to load ${section.id}.`, error);
   }
 }
 
-async function loadFeatured() {
-  const container = document.querySelector("#featured-media");
+async function loadFeatured(container, renderToken) {
+  const featuredContainer = container.querySelector("#featured-media");
 
   try {
     const items = await getTrending();
+    if (container.exploreRenderToken !== renderToken) {
+      return;
+    }
+
     const featured = items.find((item) => item.backdropPath) ?? items[0];
-    container.innerHTML = featured ? featuredMarkup(featured) : emptyState();
+    featuredContainer.innerHTML = featured ? featuredMarkup(featured) : emptyState();
   } catch (error) {
-    container.innerHTML = errorState("Could not load featured media.", "featured");
+    if (container.exploreRenderToken !== renderToken) {
+      return;
+    }
+
+    featuredContainer.innerHTML = errorState("Could not load featured media.", "featured");
     console.error("Unable to load featured media.", error);
   }
 }
 
-function bindRetryHandlers(container) {
-  container.addEventListener("click", (event) => {
+function bindRetryHandlers(container, renderToken) {
+  const handleRetry = (event) => {
     const button = event.target.closest("[data-retry]");
 
-    if (!button) {
+    if (!button || container.exploreRenderToken !== renderToken) {
       return;
     }
 
     if (button.dataset.retry === "featured") {
-      loadFeatured();
+      loadFeatured(container, renderToken);
       return;
     }
 
     const section = sections.find((item) => item.id === button.dataset.retry);
     if (section) {
-      loadSection(section);
+      loadSection(section, container, renderToken);
     }
-  });
+  };
+
+  container.addEventListener("click", handleRetry);
+  return () => container.removeEventListener("click", handleRetry);
 }
 
 function updateRowControls(rowShell) {
@@ -138,8 +157,10 @@ function updateRowControls(rowShell) {
   next.disabled = !hasOverflow || row.scrollLeft + row.clientWidth >= row.scrollWidth - 1;
 }
 
-function bindRowControls(container) {
-  container.querySelectorAll(".media-row-shell").forEach((rowShell) => {
+function bindRowControls(container, renderToken) {
+  const rowShells = container.querySelectorAll(".media-row-shell");
+
+  rowShells.forEach((rowShell) => {
     const row = rowShell.querySelector(".media-row");
     const step = () => row.clientWidth * 0.86;
 
@@ -154,15 +175,38 @@ function bindRowControls(container) {
     updateRowControls(rowShell);
   });
 
-  window.addEventListener("resize", () => {
+  const handleResize = () => {
+    if (container.exploreRenderToken !== renderToken) {
+      return;
+    }
+
     container.querySelectorAll(".media-row-shell").forEach(updateRowControls);
-  });
+  };
+  window.addEventListener("resize", handleResize);
+
+  return () => window.removeEventListener("resize", handleResize);
 }
 
 export async function renderExplorePage(container) {
+  container.searchRenderToken = Symbol("route-render");
+  container.exploreRenderCleanup?.();
+  const renderToken = Symbol("explore-render");
+  container.exploreRenderToken = renderToken;
   container.classList.add("explore-shell");
   container.innerHTML = exploreMarkup();
-  await Promise.all([loadFeatured(), ...sections.map(loadSection)]);
-  bindRetryHandlers(container);
-  bindRowControls(container);
+  await Promise.all([
+    loadFeatured(container, renderToken),
+    ...sections.map((section) => loadSection(section, container, renderToken))
+  ]);
+
+  if (container.exploreRenderToken !== renderToken) {
+    return;
+  }
+
+  const cleanupRetry = bindRetryHandlers(container, renderToken);
+  const cleanupRows = bindRowControls(container, renderToken);
+  container.exploreRenderCleanup = () => {
+    cleanupRetry();
+    cleanupRows();
+  };
 }

@@ -15,7 +15,8 @@
 ### 2) Entry Points
 
 - Main runtime entry: `frontend/index.html`, loading `frontend/src/main.js`.
-- Secondary entry points: [TODO] Go API entry at `backend/cmd/api/main.go` is planned but not initialized.
+- Secondary entry point: Go API entry at `backend/cmd/api/main.go`, currently
+  serving the `/health` foundation endpoint.
 - How entry is selected: `frontend/package.json` scripts invoke Vite.
 
 ### 3) Module Boundaries
@@ -28,13 +29,16 @@
 | `backend/internal/` | Future private Go application code, services, repositories, and providers. | Public package API without a deliberate boundary. |
 | `database/` | Schema, seed, and RLS SQL. | UI or provider logic. |
 
-These boundaries are planned, not yet represented by implementation files.
+These boundaries are represented by the current frontend page/API/component
+layers and the Go `internal/` foundation. Planned module directories remain
+empty until their corresponding feature is implemented.
 
 ### 4) Naming and Organization Rules
 
 - File naming pattern: Lowercase JavaScript and CSS filenames such as `main.js`, `variables.css`, and `vite.config.js`.
 - Directory organization pattern: frontend by technical UI layer/page, backend by internal layer/domain/provider, database by SQL concern.
-- Import aliasing or path conventions: [TODO]
+- Import aliasing: frontend modules use explicit relative imports; no barrel
+  modules or aliases are configured.
 
 ### 5) Evidence
 
