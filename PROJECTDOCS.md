@@ -398,7 +398,7 @@ as editable placeholders so the team can add the correct information later.
 | Member | ID | Responsibility |
 |---|---:|---|
 | **Muhammad Rasek Biswas** | 39 | Project lead, planning, backend, release |
-| **Md. Ashikur Rifat** | 40 | Frontend shell, responsive UI, visual design, accessibility |
+| **Md. Ashikur Rifat** | 40 | Frontend shell, responsive UI, visual design, accessibility , Doploying MERN Concept (NodeJs , MongoDB, React, HTML, CSS)|
 | **Md. Migdadur Rahman Khan** | 46 | TMDB/provider integrations, testing |
 | **Md. Abirul Alam Apurbo** | 59 | Frontend, image/icon generation, future server boundaries, visual design |
 | **Rafiur Rahman** | 62 | Testing, documentation, deployment verification, quality review |
