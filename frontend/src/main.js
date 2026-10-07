@@ -1,6 +1,7 @@
 import { createSearchSuggestions } from "./components/search/search-suggestions.js";
 import { renderExplorePage } from "./pages/explore/explore.js";
-import { renderSearchPage } from "./pages/search/search.js";
+import { renderSearchLanding, renderSearchPage } from "./pages/search/search.js";
+import { saveRecentSearch } from "./utils/recent-searches.js";
 
 const themeToggle = document.querySelector("#theme-toggle");
 const appShell = document.querySelector(".app-shell");
@@ -89,14 +90,16 @@ function renderRoute() {
   } else if (path === "/search") {
     const query = params.get("q")?.trim();
 
+    searchSuggestions.close();
+
     if (!query) {
-      renderPlaceholder("Search for a movie or TV show.");
+      searchInput.value = "";
+      renderSearchLanding(content);
       return;
     }
 
-    searchSuggestions.close();
     searchInput.value = query;
-    renderSearchPage(content, query, params.get("type"));
+    renderSearchPage(content, query, params.get("type"), params.get("sort"));
   } else if (path.startsWith("/media/")) {
     renderPlaceholder("Media details are coming in Module M04.");
   } else {
@@ -162,6 +165,7 @@ function submitSearchQuery(rawQuery) {
     return;
   }
 
+  saveRecentSearch(query);
   searchInput.value = query;
   window.history.pushState({}, "", `/search?q=${encodeURIComponent(query)}`);
   renderRoute();

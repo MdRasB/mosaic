@@ -1,6 +1,11 @@
 import { imageUrl, searchSuggestions } from "../../api/tmdb.js";
 import { debounce } from "../../utils/debounce.js";
 import { escapeHtml } from "../../utils/escape-html.js";
+import {
+  clearRecentSearches,
+  getRecentSearches,
+  removeRecentSearch
+} from "../../utils/recent-searches.js";
 
 const MIN_QUERY_LENGTH = 2;
 const DEBOUNCE_DELAY = 250;
@@ -29,7 +34,7 @@ function highlightMatch(title, query) {
 }
 
 function suggestionMarkup(item, query, index) {
-  const poster = imageUrl(item.posterPath, "w92");
+  const poster = item.posterUrl || imageUrl(item.posterPath, "w92");
 
   return `
     <li
@@ -69,7 +74,8 @@ export function createSearchSuggestions({ input, form, onSelect }) {
   const state = {
     items: [],
     activeIndex: -1,
-    requestId: 0
+    requestId: 0,
+    mode: "none"
   };
 
   const setActiveIndex = (nextIndex) => {
@@ -95,11 +101,61 @@ export function createSearchSuggestions({ input, form, onSelect }) {
   };
 
   const closeSuggestions = () => {
+    state.requestId += 1;
     state.items = [];
+    state.mode = "none";
     setActiveIndex(-1);
     list.innerHTML = "";
     list.hidden = true;
     input.setAttribute("aria-expanded", "false");
+  };
+
+  const renderRecentSearches = () => {
+    const recent = getRecentSearches();
+
+    if (!recent.length) {
+      closeSuggestions();
+      return;
+    }
+
+    state.items = recent.map((term) => ({ title: term, isRecent: true }));
+    state.mode = "recent";
+
+    list.innerHTML = `
+      <li class="search-suggestions-header">
+        <span>Recent searches</span>
+        <button class="search-suggestions-clear" type="button" aria-label="Clear all recent searches">Clear all</button>
+      </li>
+      ${recent
+        .map(
+          (term, index) => `
+        <li
+          class="search-suggestion search-suggestion-recent"
+          id="search-suggestion-${index}"
+          role="option"
+          aria-selected="false"
+          data-suggestion-index="${index}"
+          data-recent-term="${escapeHtml(term)}"
+        >
+          <span class="search-suggestion-recent-icon" aria-hidden="true">⏱</span>
+          <span class="search-suggestion-text">
+            <span class="search-suggestion-title">${escapeHtml(term)}</span>
+          </span>
+          <button
+            class="search-suggestion-remove"
+            type="button"
+            aria-label="Remove ${escapeHtml(term)} from recent searches"
+            data-remove-recent="${escapeHtml(term)}"
+          >×</button>
+        </li>
+      `
+        )
+        .join("")}
+    `;
+
+    list.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+    setActiveIndex(-1);
   };
 
   const renderSuggestions = (items, query) => {
@@ -109,7 +165,13 @@ export function createSearchSuggestions({ input, form, onSelect }) {
     }
 
     state.items = items;
-    list.innerHTML = items.map((item, index) => suggestionMarkup(item, query, index)).join("");
+    state.mode = "suggestions";
+    list.innerHTML = `
+      <li class="search-suggestions-header">
+        <span>Suggestions</span>
+      </li>
+      ${items.map((item, index) => suggestionMarkup(item, query, index)).join("")}
+    `;
     list.hidden = false;
     input.setAttribute("aria-expanded", "true");
     setActiveIndex(-1);
@@ -157,8 +219,7 @@ export function createSearchSuggestions({ input, form, onSelect }) {
     const query = input.value.trim();
 
     if (query.length < MIN_QUERY_LENGTH) {
-      state.requestId += 1;
-      closeSuggestions();
+      renderRecentSearches();
       return;
     }
 
@@ -167,7 +228,11 @@ export function createSearchSuggestions({ input, form, onSelect }) {
 
   input.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      closeSuggestions();
+      if (!list.hidden) {
+        closeSuggestions();
+      } else if (input.value) {
+        input.value = "";
+      }
       return;
     }
 
@@ -188,9 +253,17 @@ export function createSearchSuggestions({ input, form, onSelect }) {
   });
 
   input.addEventListener("focus", () => {
-    if (state.items.length && input.value.trim().length >= MIN_QUERY_LENGTH) {
-      list.hidden = false;
-      input.setAttribute("aria-expanded", "true");
+    const query = input.value.trim();
+
+    if (query.length >= MIN_QUERY_LENGTH) {
+      if (state.items.length && state.mode === "suggestions") {
+        list.hidden = false;
+        input.setAttribute("aria-expanded", "true");
+      } else {
+        loadSuggestions(query);
+      }
+    } else {
+      renderRecentSearches();
     }
   });
 
@@ -199,8 +272,26 @@ export function createSearchSuggestions({ input, form, onSelect }) {
   });
 
   list.addEventListener("click", (event) => {
-    const option = event.target.closest("[data-suggestion-index]");
+    const clearButton = event.target.closest(".search-suggestions-clear");
+    if (clearButton) {
+      event.preventDefault();
+      clearRecentSearches();
+      closeSuggestions();
+      input.focus();
+      return;
+    }
 
+    const removeButton = event.target.closest("[data-remove-recent]");
+    if (removeButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      removeRecentSearch(removeButton.dataset.removeRecent);
+      renderRecentSearches();
+      input.focus();
+      return;
+    }
+
+    const option = event.target.closest("[data-suggestion-index]");
     if (option) {
       selectSuggestion(Number(option.dataset.suggestionIndex));
     }
