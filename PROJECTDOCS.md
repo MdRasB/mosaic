@@ -399,7 +399,7 @@ as editable placeholders so the team can add the correct information later.
 |---|---:|---|
 | **Muhammad Rasek Biswas** | 39 | Project lead, planning, backend, release |
 | **Md. Ashikur Rifat** | 40 | Frontend shell, responsive UI, visual design, accessibility |
-| **Md. Migdadur Rahman Khan** | 46 | TMDB/provider integrations, testing |
+| **Md. Migdadur Rahman Khan** | 46 | TMDB/provider integrations, Integration Testing , Error Handling for External Services, API Key/Security Management |
 | **Md. Abirul Alam Apurbo** | 59 | Frontend, image/icon generation, future server boundaries, visual design |
 | **Rafiur Rahman** | 62 | Testing, documentation, deployment verification, quality review |
 
