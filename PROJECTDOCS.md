@@ -395,11 +395,11 @@ as editable placeholders so the team can add the correct information later.
 
 | Member | ID | Responsibility |
 |---|---:|---|
-| **Muhammad Rasek Biswas** | 39 | Project lead, planning, backend, release |
+| **Muhammad Rasek Biswas** | 39 | Project lead, planning, backend, deployment, database |
 | **Md. Migdadur Rahman Khan** | 46 | TMDB/provider integrations, Integration Testing , Error Handling for External Services, API Key/Security Management |
 | **Md. Ashikur Rifat** | 40 | Frontend shell, responsive UI, visual design, accessibility , Doploying MERN Concept (NodeJs , MongoDB, React, HTML, CSS)|
 | **Md. Abirul Alam Apurbo** | 59 | Frontend, image/icon generation, future server boundaries, visual design |
-| **Rafiur Rahman** | 62 | Testing, documentation, deployment |
+| **Rafiur Rahman** | 62 | Testing, documentation, design |
 
 ### Responsibility boundaries
 
