@@ -62,8 +62,6 @@ planned but are not implemented in the current source tree.
 | [`docs/codebase/INTEGRATIONS.md`](docs/codebase/INTEGRATIONS.md) | External services and integration concerns |
 | [`docs/codebase/TESTING.md`](docs/codebase/TESTING.md) | Current test commands and coverage gaps |
 | [`docs/codebase/CONCERNS.md`](docs/codebase/CONCERNS.md) | Current risks, technical debt, and scaling concerns |
-| [`Mosaic_Codebase_Guide.md`](../architecture_design/mosaic/Mosaic_Codebase_Guide.md) | Detailed source-level guide created outside this repository |
-| [`Mosaic project plan`](../architecture_design/mosaic/Mosaic_Project_Complete_Plan_Final.md) | Original long-form project plan, stored outside this repository |
 
 ## Project structure
 
@@ -428,13 +426,3 @@ while requiring preservation of applicable notices and license terms.
 TMDB content and imagery remain subject to TMDB's terms and policies. Mosaic's
 content-safety filtering is an application policy and is not a replacement for
 provider classification or legal review.
-
-## Source of truth and maintenance
-
-Source code, manifests, configuration templates, and executable commands are
-the source of truth. Update this document when a module becomes implemented,
-when ownership changes, or when setup/deployment commands change.
-
-Generated bundles, local environment files, dependency directories, and
-temporary scan outputs are not documentation sources and should not be edited
-as if they were source modules.
