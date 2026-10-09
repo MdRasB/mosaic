@@ -90,7 +90,7 @@ function detailsMarkup(media) {
             </div>
             ${media.providers.length ? `<div class="provider-list">${media.providers.map((provider) => `<span class="provider"><img src="${provider.logoUrl}" alt="">${escapeHtml(provider.name)}</span>`).join("")}</div>` : ""}
           </section>` : ""}
-        ${media.related.length ? `<section class="media-details-section" aria-labelledby="related-title"><p class="eyebrow">Keep exploring</p><h2 id="related-title">More like this</h2>${mediaRow(media.related)}</section>` : ""}
+        ${media.related.length ? `<section class="media-details-section media-details-related" aria-labelledby="related-title"><p class="eyebrow">Keep exploring</p><h2 id="related-title">More like this</h2><div class="media-row">${mediaRow(media.related)}</div></section>` : ""}
       </div>
     </article>
   `;
