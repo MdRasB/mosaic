@@ -84,6 +84,7 @@ Set this production environment variable in Cloudflare Pages:
 
 ```text
 VITE_TMDB_API_KEY=your_tmdb_key
+VITE_API_BASE_URL=https://mosaic-api-5q09.onrender.com
 ```
 
 Cloudflare Pages runs the Vite build with that variable; do not upload
