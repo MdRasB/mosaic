@@ -85,6 +85,23 @@ function isCurrentNavigationTarget(link) {
   );
 }
 
+function updateAuthControls() {
+  loginButton.hidden = Boolean(currentUser);
+  registerButton.hidden = Boolean(currentUser);
+  profileButton.hidden = !currentUser;
+  profileButton.textContent = currentUser ? currentUser.email.slice(0, 2).toUpperCase() : "MR";
+  profileButton.setAttribute("aria-label", currentUser ? `Open account for ${currentUser.email}` : "Open profile");
+}
+
+async function loadSession() {
+  try {
+    currentUser = await authService.me();
+  } catch {
+    currentUser = null;
+  }
+  updateAuthControls();
+}
+
 function renderRoute() {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
@@ -93,7 +110,7 @@ function renderRoute() {
   if (path === "/login" || path === "/register") {
     if (currentUser) {
       window.history.replaceState({}, "", "/dashboard");
-      renderRoute();
+      loadSession().then(renderRoute);
       return;
     }
     renderAuthPage(content, path.slice(1), () => {
@@ -128,23 +145,6 @@ function renderRoute() {
       searchInput.value = "";
       renderSearchLanding(content);
       return;
-    }
-
-    function updateAuthControls() {
-      loginButton.hidden = Boolean(currentUser);
-      registerButton.hidden = Boolean(currentUser);
-      profileButton.hidden = !currentUser;
-      profileButton.textContent = currentUser ? currentUser.email.slice(0, 2).toUpperCase() : "MR";
-      profileButton.setAttribute("aria-label", currentUser ? `Open account for ${currentUser.email}` : "Open profile");
-    }
-
-    async function loadSession() {
-      try {
-        currentUser = await authService.me();
-      } catch {
-        currentUser = null;
-      }
-      updateAuthControls();
     }
 
     searchInput.value = query;
