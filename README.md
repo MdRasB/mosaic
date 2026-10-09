@@ -103,6 +103,29 @@ go run ./cmd/api
 
 Check <http://localhost:8080/health>.
 
+### Full local stack and authentication
+
+Create the local database environment, then apply the M05 migration:
+
+```bash
+cp .env.example .env
+make db-up
+make db-migrate
+```
+
+Set the matching PostgreSQL connection string for the Go API:
+
+```bash
+export DATABASE_URL='postgres://mosaic:change-this-local-password@127.0.0.1:5432/mosaic?sslmode=disable'
+make run
+```
+
+`make run` starts PostgreSQL, applies the idempotent auth migration, the Go
+API on `http://localhost:8080`, and Vite on `http://localhost:5173`. Open
+`/register` with a password of at least 15 characters, then sign in at
+`/login`. Authentication uses an HttpOnly session cookie; credentials are not
+stored in browser storage.
+
 ### Local database
 
 The initial local database runs as PostgreSQL through Docker Compose.
@@ -124,4 +147,3 @@ To stop the database without deleting its data:
 ```bash
 docker compose down
 ```
-

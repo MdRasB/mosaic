@@ -2,6 +2,8 @@ import { createSearchSuggestions } from "./components/search/search-suggestions.
 import { renderExplorePage } from "./pages/explore/explore.js";
 import { renderSearchLanding, renderSearchPage } from "./pages/search/search.js";
 import { parseMediaRoute, renderMediaDetailsPage } from "./pages/media/media-details.js";
+import { authService } from "./auth/auth-service.js";
+import { renderAuthPage, renderDashboard } from "./pages/auth/auth.js";
 import { saveRecentSearch } from "./utils/recent-searches.js";
 
 const themeToggle = document.querySelector("#theme-toggle");
@@ -18,6 +20,7 @@ const themeStorageKey = "mosaic-theme";
 const content = document.querySelector("#app-content");
 const searchForm = document.querySelector("#global-search-form");
 const searchInput = document.querySelector("#global-search");
+let currentUser = null;
 
 function setTheme(isLight, { persist = true } = {}) {
   document.documentElement.toggleAttribute("data-theme", isLight);
@@ -87,7 +90,34 @@ function renderRoute() {
   const params = new URLSearchParams(window.location.search);
   content.mediaDetailsRenderToken = Symbol("route-change");
 
-  if (path === "/" || path === "/explore") {
+  if (path === "/login" || path === "/register") {
+    if (currentUser) {
+      window.history.replaceState({}, "", "/dashboard");
+      renderRoute();
+      return;
+    }
+    renderAuthPage(content, path.slice(1), () => {
+      const destination = new URLSearchParams(window.location.search).get("redirect");
+      const safeDestination = destination?.startsWith("/") && !destination.startsWith("//")
+        ? destination
+        : "/dashboard";
+      window.history.pushState({}, "", safeDestination);
+      loadSession().then(renderRoute);
+    });
+  } else if (path === "/dashboard") {
+    if (!currentUser) {
+      window.history.replaceState({}, "", `/login?redirect=${encodeURIComponent(path)}`);
+      renderRoute();
+      return;
+    }
+    renderDashboard(content, currentUser, async () => {
+      await authService.logout();
+      currentUser = null;
+      updateAuthControls();
+      window.history.pushState({}, "", "/explore");
+      renderRoute();
+    });
+  } else if (path === "/" || path === "/explore") {
     renderExplorePage(content);
   } else if (path === "/search") {
     const query = params.get("q")?.trim();
@@ -98,6 +128,23 @@ function renderRoute() {
       searchInput.value = "";
       renderSearchLanding(content);
       return;
+    }
+
+    function updateAuthControls() {
+      loginButton.hidden = Boolean(currentUser);
+      registerButton.hidden = Boolean(currentUser);
+      profileButton.hidden = !currentUser;
+      profileButton.textContent = currentUser ? currentUser.email.slice(0, 2).toUpperCase() : "MR";
+      profileButton.setAttribute("aria-label", currentUser ? `Open account for ${currentUser.email}` : "Open profile");
+    }
+
+    async function loadSession() {
+      try {
+        currentUser = await authService.me();
+      } catch {
+        currentUser = null;
+      }
+      updateAuthControls();
     }
 
     searchInput.value = query;
@@ -143,14 +190,20 @@ sidebarOverlay.addEventListener("click", () => {
   sidebarToggle.setAttribute("aria-label", "Open sidebar");
 });
 
-// M05 authentication is not implemented yet; these controls document the planned public header.
 loginButton.addEventListener("click", () => {
   window.location.href = "/login";
 });
 registerButton.addEventListener("click", () => {
   window.location.href = "/register";
 });
-profileButton.addEventListener("click", () => showMessage("Profile will be available in Module M06."));
+profileButton.addEventListener("click", () => {
+  if (currentUser) {
+    window.history.pushState({}, "", "/dashboard");
+    renderRoute();
+  } else {
+    showMessage("Sign in to open your profile.");
+  }
+});
 
 navLinks.forEach((link) => {
   link.addEventListener("click", (event) => {
@@ -181,7 +234,7 @@ function submitSearchQuery(rawQuery) {
   saveRecentSearch(query);
   searchInput.value = query;
   window.history.pushState({}, "", `/search?q=${encodeURIComponent(query)}`);
-  renderRoute();
+  loadSession().then(renderRoute);
 }
 
 const searchSuggestions = createSearchSuggestions({
