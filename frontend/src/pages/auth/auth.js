@@ -11,7 +11,7 @@ function authMarkup(mode) {
         <p class="muted">${register ? "Start building your personal media world." : "Continue exploring your world."}</p>
         <form class="auth-form" id="auth-form">
           <label>Email<input name="email" type="email" autocomplete="email" required maxlength="254"></label>
-          <label>Password<input name="password" type="password" autocomplete="${register ? "new-password" : "current-password"}" required minlength="15" maxlength="128"></label>
+          <label>Password<input name="password" type="password" autocomplete="${register ? "new-password" : "current-password"}" required minlength="8" maxlength="128"></label>
           <p class="auth-message" id="auth-message" role="alert"></p>
           <button class="button button-primary" type="submit">${register ? "Create account" : "Sign in"}</button>
         </form>
