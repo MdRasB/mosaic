@@ -1,0 +1,221 @@
+.media-details {
+  padding-bottom: var(--space-8);
+}
+
+.media-details-hero {
+  background-color: var(--color-surface);
+  background-image: var(--details-image);
+  background-position: center;
+  background-size: cover;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  min-height: 34rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.media-details-hero-overlay {
+  background: linear-gradient(90deg, var(--color-bg) 12%, rgb(16 16 24 / 76%) 52%, rgb(16 16 24 / 36%)), linear-gradient(0deg, var(--color-bg), transparent 45%);
+  inset: 0;
+  position: absolute;
+}
+
+.media-details-hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  justify-content: space-between;
+  min-height: 34rem;
+  padding: var(--space-6);
+  position: relative;
+}
+
+.media-details-back {
+  align-self: flex-start;
+}
+
+.media-details-heading {
+  align-items: flex-end;
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: 13rem minmax(0, 38rem);
+}
+
+.media-details-poster {
+  aspect-ratio: 2 / 3;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.media-details-poster img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.media-details-poster span {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  padding: var(--space-3);
+  text-align: center;
+}
+
+.media-details-heading h1 {
+  font-size: clamp(2.5rem, 6vw, 5.5rem);
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  margin: var(--space-2) 0 var(--space-4);
+}
+
+.media-details-tagline,
+.media-details-overview {
+  color: var(--color-muted);
+  line-height: 1.7;
+}
+
+.media-details-meta,
+.media-details-genres,
+.provider-list {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.media-details-meta {
+  color: var(--color-muted);
+  margin-bottom: var(--space-4);
+}
+
+.media-details-body {
+  display: grid;
+  gap: var(--space-7);
+  margin: 0 auto;
+  max-width: 72rem;
+  padding: var(--space-8) 0;
+}
+
+.media-details-related .media-row {
+  gap: var(--space-4);
+  grid-auto-columns: minmax(7.5rem, 10rem);
+  padding: var(--space-2) 0 var(--space-3);
+}
+
+.media-details-related .media-card {
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+.media-details-related .media-card-content {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+}
+
+.media-details-related .media-card-content h3 {
+  font-size: 0.85rem;
+}
+
+.media-details-related .media-card-meta {
+  font-size: 0.68rem;
+}
+
+.media-details-section {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.media-details-section h3 {
+  font-size: 1rem;
+  margin-top: var(--space-3);
+}
+
+.media-people {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  list-style: none;
+}
+
+.media-person {
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  gap: var(--space-2);
+  min-width: 11rem;
+  padding: var(--space-2);
+}
+
+.media-person img,
+.media-person-fallback {
+  align-items: center;
+  background: var(--color-surface-raised);
+  border-radius: 50%;
+  display: flex;
+  height: 2.5rem;
+  justify-content: center;
+  object-fit: cover;
+  width: 2.5rem;
+}
+
+.media-person span {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.media-person small {
+  color: var(--color-muted);
+}
+
+.provider-list {
+  margin-top: var(--space-2);
+}
+
+.provider {
+  align-items: center;
+  color: var(--color-muted);
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+.provider img {
+  border-radius: var(--radius-sm);
+  height: 2rem;
+  width: 2rem;
+}
+
+.media-details-state {
+  align-items: center;
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  min-height: 60vh;
+}
+
+@media (max-width: 700px) {
+  .media-details-hero,
+  .media-details-hero-content {
+    min-height: 0;
+  }
+
+  .media-details-heading {
+    align-items: start;
+    grid-template-columns: 7rem minmax(0, 1fr);
+  }
+
+  .media-details-heading h1 {
+    font-size: clamp(2rem, 11vw, 3.5rem);
+  }
+
+  .media-details-body {
+    padding-top: var(--space-6);
+  }
+
+  .media-details-related .media-row {
+    grid-auto-columns: minmax(7rem, 28vw);
+  }
+}

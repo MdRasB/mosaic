@@ -6,10 +6,10 @@ application: visitors can explore TMDB-powered media rows, search movies and
 TV shows, inspect search suggestions, switch themes, and use the responsive
 desktop/mobile shell.
 
-The repository also contains a Go API foundation and PostgreSQL Docker
-scaffolding for later modules. Authentication, collections, favorites,
-watchlists, ratings, reviews, media details, and user data persistence are
-planned but are not implemented in the current source tree.
+The repository also contains a Go API foundation, PostgreSQL Docker
+scaffolding, and the public M04 media-details page. Authentication,
+collections, favorites, watchlists, ratings, reviews, and user data persistence
+remain planned for later modules.
 
 > **Current implementation note:** This document describes what exists in the
 > repository today. Planned directories are preserved with `.gitkeep` files,
@@ -38,11 +38,12 @@ planned but are not implemented in the current source tree.
 - Supports dark/light theme persistence through `localStorage`.
 - Provides a Go `/health` endpoint.
 - Provides local PostgreSQL infrastructure through Docker Compose.
+- Provides public `/media/movie/:id` and `/media/tv/:id` details pages with
+  loading, invalid-route, retry, related-media, and metadata states.
 
 ### What is not implemented yet
 
 - Authentication and account management.
-- Media details pages.
 - User collections, favorites, and watchlists.
 - Ratings, reviews, social features, and profile pages.
 - Supabase integration and row-level security.
@@ -62,8 +63,9 @@ planned but are not implemented in the current source tree.
 | [`docs/codebase/INTEGRATIONS.md`](docs/codebase/INTEGRATIONS.md) | External services and integration concerns |
 | [`docs/codebase/TESTING.md`](docs/codebase/TESTING.md) | Current test commands and coverage gaps |
 | [`docs/codebase/CONCERNS.md`](docs/codebase/CONCERNS.md) | Current risks, technical debt, and scaling concerns |
-| [`Mosaic_Codebase_Guide.md`](../architecture_design/mosaic/Mosaic_Codebase_Guide.md) | Detailed source-level guide created outside this repository |
-| [`Mosaic project plan`](../architecture_design/mosaic/Mosaic_Project_Complete_Plan_Final.md) | Original long-form project plan, stored outside this repository |
+| [`docs/Mosaic_Project_Complete_Plan_Final.md`](docs/Mosaic_Project_Complete_Plan_Final.md) | Canonical project plan and module roadmap |
+| [`docs/M04-M05-MERGED-PLAN.md`](docs/M04-M05-MERGED-PLAN.md) | Reconciled M04/M05 implementation plan |
+| [`docs/deployment/FREE-HOSTING.md`](docs/deployment/FREE-HOSTING.md) | Free hosting and local deployment model |
 
 ## Project structure
 
@@ -397,11 +399,11 @@ as editable placeholders so the team can add the correct information later.
 
 | Member | ID | Responsibility |
 |---|---:|---|
-| **Muhammad Rasek Biswas** | 39 | Project lead, planning, backend, release |
+| **Muhammad Rasek Biswas** | 39 | Project lead, planning, backend, deployment, database |
 | **Md. Migdadur Rahman Khan** | 46 | TMDB/provider integrations, Integration Testing , Error Handling for External Services, API Key/Security Management |
 | **Md. Ashikur Rifat** | 40 | Frontend shell, responsive UI, visual design, accessibility , Doploying MERN Concept (NodeJs , MongoDB, React, HTML, CSS)|
-| **Md. Abirul Alam Apurbo** | 59 | Frontend, image/icon generation, future server boundaries, visual design |
-| **Rafiur Rahman** | 62 | Testing, documentation, deployment |
+| **Md. Abirul Alam Apurbo** | 59 | Frontend, communication, image/icon generation, future server boundaries, visual design |
+| **Rafiur Rahman** | 62 | Testing, documentation, design |
 
 ### Responsibility boundaries
 
@@ -428,13 +430,3 @@ while requiring preservation of applicable notices and license terms.
 TMDB content and imagery remain subject to TMDB's terms and policies. Mosaic's
 content-safety filtering is an application policy and is not a replacement for
 provider classification or legal review.
-
-## Source of truth and maintenance
-
-Source code, manifests, configuration templates, and executable commands are
-the source of truth. Update this document when a module becomes implemented,
-when ownership changes, or when setup/deployment commands change.
-
-Generated bundles, local environment files, dependency directories, and
-temporary scan outputs are not documentation sources and should not be edited
-as if they were source modules.

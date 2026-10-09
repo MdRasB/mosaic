@@ -1,48 +1,37 @@
 # Codebase Concerns
 
-## Core Sections (Required)
+## Prioritized risks
 
-### 1) Top Risks (Prioritized)
-
-| Severity | Concern | Evidence | Impact | Suggested action |
-|---|---|---|---|---|
-| high | Browser-exposed credentials must not include Supabase secret/service-role keys. | `frontend/src/api/tmdb.js`, `README.md` | Credential exposure could bypass RLS. | Keep only publishable TMDB configuration in the browser; add server-side boundaries before auth/data work. |
-| medium | External API terms, quotas, provider links, and free-tier limits can change. | `Mosaic_Project_Complete_Plan_Final.md:1345-1347`, `2248-2267` | Deployment or provider behavior may change. | Re-check official terms before implementation and deployment. |
-
-### 2) Technical Debt
-
-| Debt item | Why it exists | Where | Risk if ignored | Suggested fix |
-|---|---|---|---|---|
-| Browser-only API integration | The current public V1 calls TMDB from the frontend. | `frontend/src/api/tmdb.js` | The TMDB key is observable and provider quotas apply per client. | Move protected/provider-sensitive requests behind Go when server-side features require them. |
-
-### 3) Security Concerns
-
-| Risk | OWASP category | Evidence | Current mitigation | Gap |
-|---|---|---|---|---|
-| Misuse of browser-visible credentials | A05 | `frontend/src/api/tmdb.js`, `README.md` | TMDB uses publishable browser configuration; no Supabase secret is exposed. | RLS and protected server-side data access are not implemented yet. |
-| Missing server-side admin enforcement | A01 | Planned auth/data modules | Plan requires server-side/strong database policies. | Admin controls are not implemented until those modules are added. |
-
-### 4) Performance and Scaling Concerns
-
-| Concern | Evidence | Current symptom | Scaling risk | Suggested improvement |
-|---|---|---|---|---|
-| Browser API request volume | `frontend/src/api/tmdb.js`, `frontend/src/components/search/search-suggestions.js` | Explore rows paginate to safe titles and suggestions debounce input. | Provider quotas can still be reached by many users. | Keep caching/debouncing and add server-side controls if traffic grows. |
-
-### 5) Fragile/High-Churn Areas
-
-| Area | Why fragile | Churn signal | Safe change strategy |
+| Severity | Concern | Evidence | Mitigation/next step |
 |---|---|---|---|
-| Frontend/API boundary | Pages consume normalized TMDB objects through `api/tmdb.js`. | M03 added search and suggestions. | Preserve the API normalization boundary as modules expand. |
+| high | TMDB key is visible in browser output | `frontend/src/api/tmdb.js`, `README.md` | Treat it as public; move sensitive/provider-controlled calls behind Go if required. |
+| high | Authentication and private persistence are not implemented | `backend/internal/httpserver/server.go`, `docs/M04-M05-MERGED-PLAN.md` | Implement M05 before claiming protected user features. |
+| medium | Free hosting services may sleep or change limits | `docs/deployment/FREE-HOSTING.md` | Recheck provider terms before release and document cold starts. |
+| medium | Frontend has no automated browser tests | `frontend/package.json` | Add route/page tests or a browser smoke suite when auth is introduced. |
 
-### 6) `[ASK USER]` Questions
+## Technical debt
 
-No blocking architecture question is currently open. Authentication, database
-policies, and server-side provider boundaries remain intentionally deferred to
-their planned modules.
+- The current Go service does not connect to PostgreSQL.
+- PostgreSQL 18 requires its volume mounted at `/var/lib/postgresql` so the
+  image can manage its version-specific data directory.
+- `database/schema/` contains only a placeholder; versioned migrations are
+  `[TODO]`.
+- Vite output is intentionally non-minified in `frontend/vite.config.js`;
+  this improves inspection but increases deployed asset size.
+- The existing page shell contains placeholder auth controls until M05.
 
-### 7) Evidence
+## Security gaps
 
-- `README.md`
+No passwords, session cookies, or database credentials are currently handled by
+the application. M05 must add server-side sessions, Argon2id, CSRF/origin
+controls, rate limiting, and neutral auth error messages before production
+deployment.
+
+## Evidence
+
+- `frontend/vite.config.js`
 - `frontend/src/api/tmdb.js`
-- `frontend/src/components/search/search-suggestions.js`
-- `backend/cmd/api/main.go`
+- `backend/internal/httpserver/server.go`
+- `database/schema/.gitkeep`
+- `docs/M04-M05-MERGED-PLAN.md`
+- `docs/deployment/FREE-HOSTING.md`
