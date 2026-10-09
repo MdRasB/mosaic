@@ -26,9 +26,9 @@ function profileMarkup(profile) {
     <section class="profile-page" aria-labelledby="profile-title">
       <div class="profile-heading">
         <div>
-          <p class="eyebrow">Profile</p>
-          <h1 id="profile-title">Your media world.</h1>
-          <p class="muted">A compact view of how you show up in Mosaic.</p>
+          <p class="eyebrow">Account</p>
+          <h1 id="profile-title">Profile</h1>
+          <p class="muted">Your identity in the Mosaic community.</p>
         </div>
         <a class="button button-primary" href="/settings/profile">Edit profile</a>
       </div>
