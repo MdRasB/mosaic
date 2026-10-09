@@ -7,15 +7,14 @@
 | Frontend | Vanilla JavaScript ES modules | `frontend/src/main.js` |
 | Frontend tooling | Vite 7.x, npm | `frontend/package.json`, `frontend/vite.config.js` |
 | Backend | Go 1.27, `net/http` | `backend/go.mod`, `backend/cmd/api/main.go` |
-| Database | PostgreSQL through Docker Compose | `compose.yml`, `.env.example` |
+| Database | PostgreSQL 18 through Docker Compose | `compose.yml`, `.env.example` |
 | Production frontend | Cloudflare Pages-compatible static Vite output | `README.md`, `frontend/package.json` |
 
 ## Dependencies
 
 The frontend currently has only Vite as a development dependency. The browser
-calls TMDB through the native Fetch API. The Go backend currently uses only the
-standard library; database and authentication dependencies are `[TODO]` for
-M05.
+calls TMDB through the native Fetch API. The Go backend uses `pgx/v5` for
+PostgreSQL access and `golang.org/x/crypto/argon2` for password hashing.
 
 ## Commands
 
@@ -35,7 +34,8 @@ Equivalent frontend/backend commands are documented in `README.md`.
 - `.env.example`: local PostgreSQL variables.
 - Backend `PORT` and `CORS_ALLOWED_ORIGINS` are read by
   `backend/internal/config/config.go`.
-- `[TODO]` Add backend `DATABASE_URL` when M05 database access is implemented.
+- Backend `DATABASE_URL`, `SESSION_COOKIE_NAME`, and `APP_ENV` configure
+  authentication and session cookies.
 
 ## Evidence
 

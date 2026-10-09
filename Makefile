@@ -1,6 +1,15 @@
-.PHONY: run frontend backend db-up db-down build test check clean
+-include .env
 
-run: db-up
+export POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD POSTGRES_PORT DATABASE_URL
+
+POSTGRES_DB ?= mosaic
+POSTGRES_USER ?= mosaic
+POSTGRES_PORT ?= 5432
+DATABASE_URL ?= postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@127.0.0.1:$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable
+
+.PHONY: run frontend backend db-up db-down db-migrate build test check clean
+
+run: db-up db-migrate
 	@trap 'kill 0' INT TERM; \
 		(cd backend && go run ./cmd/api) & \
 		(cd frontend && npm run dev -- --host 127.0.0.1) & \
@@ -13,10 +22,13 @@ backend:
 	cd backend && go run ./cmd/api
 
 db-up:
-	docker compose up -d database
+	docker compose up -d --wait database
 
 db-down:
 	docker compose down
+
+db-migrate:
+	docker compose exec -T database psql -U "$${POSTGRES_USER:-mosaic}" -d "$${POSTGRES_DB:-mosaic}" < database/migrations/000001_auth.sql
 
 build:
 	cd frontend && npm run build

@@ -2,11 +2,11 @@
 
 ## Current decision
 
-Keep the deployed Cloudflare Pages frontend unchanged. The current repository
-does not yet have an implemented authentication or database API, so deploying
-new backend infrastructure now would add operational risk without serving a
-working feature. Module M05 must be implemented before connecting production
-accounts or persistent user data.
+Keep the deployed Cloudflare Pages frontend unchanged while the local M05
+authentication core is verified. The repository now includes safe deployment
+scaffolding for the Go API and PostgreSQL migration, but production account
+data must not be enabled until the hardening items in the M05 plan are
+complete.
 
 Cloudflare cannot host the current Go `net/http` server directly as a normal
 long-running process. Cloudflare Workers/Pages Functions use an edge runtime,
@@ -39,9 +39,11 @@ providers avoids coupling the database lifecycle to the sleeping Go service.
 
 1. Keep Cloudflare Pages serving the current frontend.
 2. Implement and test M05 locally against Docker PostgreSQL.
-3. Deploy a Go API to Render Free and PostgreSQL to Supabase Free.
-4. Set backend-only `DATABASE_URL` and CORS/API settings in Render.
-5. Verify health, migrations, cookies, and authentication before exposing
+3. Create the Render service from `render.yaml`.
+4. Create Supabase PostgreSQL and set backend-only `DATABASE_URL` and
+   `CORS_ALLOWED_ORIGINS` in Render.
+5. Apply the versioned migration and verify health, migrations, cookies, and
+   authentication before exposing
    private frontend routes.
 6. Consider Cloudflare Workers + D1 only as a deliberate future migration,
    not as a parallel database.
@@ -54,14 +56,14 @@ providers avoids coupling the database lifecycle to the sleeping Go service.
 - Build command: `npm run build`
 - Output directory: `dist`
 - Public variable: `VITE_TMDB_API_KEY`
-- API URL: use a same-origin `/api/v1` proxy when the Pages project is given a
-  compatible route; otherwise configure the public API origin and verify
-  credentialed cookie behavior with an intentional CORS policy.
+- `VITE_API_BASE_URL`: the Render API origin, without a trailing slash. Leave
+  it empty for local Vite proxy development.
 
 ### Render
 
 - Build: `go build -o mosaic-api ./cmd/api`
 - Start: `./mosaic-api`
+- Blueprint: `render.yaml`
 - Environment: `PORT`, `DATABASE_URL`, `CORS_ALLOWED_ORIGINS`, and later
   email/rate-limit secrets.
 - Never place `DATABASE_URL` or server secrets in `frontend/.env`,
@@ -82,6 +84,11 @@ make db-up
 make run
 make check
 ```
+
+For a deployed frontend, set `VITE_API_BASE_URL` to the Render API origin and
+set `CORS_ALLOWED_ORIGINS` to the exact Cloudflare Pages origin. Cookies remain
+credentialed and are issued by the API; verify the production browser flow
+before treating the deployment as complete.
 
 The official platform pages should be checked before deployment because free
 limits and policies change:

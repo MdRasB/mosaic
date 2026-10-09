@@ -49,6 +49,15 @@ Email verification and password recovery are part of the production gate, but
 require an email provider. They remain an explicit follow-up unless local
 Mailpit and a deployment email provider are configured.
 
+### Current implementation milestone
+
+The local core milestone now includes registration, login, logout, session
+restoration, protected `/dashboard`, an HttpOnly SameSite session cookie,
+Argon2id password hashing, PostgreSQL migrations, and a Vite `/api` proxy.
+Email verification, password recovery, CSRF tokens for future authenticated
+write operations, and distributed rate limiting remain production hardening
+work before public launch.
+
 ## Execution order
 
 1. M04 route/API/page and responsive acceptance checks.
