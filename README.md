@@ -126,6 +126,11 @@ API on `http://localhost:8080`, and Vite on `http://localhost:5173`. Open
 `/login`. Authentication uses an HttpOnly session cookie; credentials are not
 stored in browser storage.
 
+During local Vite development, API requests intentionally use the relative
+`/api` proxy even if `VITE_API_BASE_URL` is present in `frontend/.env`. This
+keeps `localhost` and `127.0.0.1` browser sessions same-origin. Open the site
+from the URL printed by Vite, preferably `http://localhost:5173`.
+
 If the database container already existed before changing `POSTGRES_PASSWORD`,
 the password in `.env` must match the password stored in that PostgreSQL
 volume. Changing the environment variable does not change an existing
