@@ -139,8 +139,8 @@ func validateCredentials(email, password string) error {
 	if _, err := mail.ParseAddress(email); err != nil || !strings.Contains(email, "@") {
 		return errors.New("enter a valid email address")
 	}
-	if len([]rune(password)) < 15 || len([]rune(password)) > 128 {
-		return errors.New("password must be between 15 and 128 characters")
+	if len([]rune(password)) < 8 || len([]rune(password)) > 128 {
+		return errors.New("password must be between 8 and 128 characters")
 	}
 	return nil
 }

@@ -36,6 +36,10 @@ expiry/revocation, malformed input, rate limiting, and token use. The local
 migration and endpoint flow can be exercised with `make db-migrate` and the API
 running with `DATABASE_URL` configured.
 
+Passwords are accepted from 8 through 128 characters. A local API smoke test
+should verify registration, `/auth/me`, logout, and the expected `401` after
+logout.
+
 ## Evidence
 
 - `backend/internal/auth/password_test.go`

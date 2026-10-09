@@ -5,7 +5,7 @@ export POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD POSTGRES_PORT DATABASE_URL
 POSTGRES_DB ?= mosaic
 POSTGRES_USER ?= mosaic
 POSTGRES_PORT ?= 5432
-DATABASE_URL ?= postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@127.0.0.1:$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable
+DATABASE_URL := $(or $(DATABASE_URL),postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@127.0.0.1:$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable)
 
 .PHONY: run frontend backend db-up db-down db-migrate build test check clean
 

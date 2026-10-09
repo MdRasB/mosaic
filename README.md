@@ -122,9 +122,17 @@ make run
 
 `make run` starts PostgreSQL, applies the idempotent auth migration, the Go
 API on `http://localhost:8080`, and Vite on `http://localhost:5173`. Open
-`/register` with a password of at least 15 characters, then sign in at
+`/register` with a password of at least 8 characters, then sign in at
 `/login`. Authentication uses an HttpOnly session cookie; credentials are not
 stored in browser storage.
+
+If the database container already existed before changing `POSTGRES_PASSWORD`,
+the password in `.env` must match the password stored in that PostgreSQL
+volume. Changing the environment variable does not change an existing
+database user's password. If `make run` reports password authentication failed,
+restore the original password in `.env`, or change the database password from
+inside PostgreSQL before retrying. Also stop any older frontend/backend
+processes before running `make run`, so ports `5173` and `8080` are available.
 
 ### Local database
 
