@@ -22,19 +22,27 @@ manual browser verification.
 
 ## Current coverage
 
-The health handler and method rejection are covered. There are no automated
-tests for TMDB requests, route parsing, M04 rendering, responsive layout,
-browser history, or authentication.
+The health handler and method rejection are covered. Password hashing has unit
+coverage, and a local PostgreSQL smoke test covers registration, session
+restoration, and logout. There are no automated tests for TMDB requests, route
+parsing, M04 rendering, responsive layout, browser history, or full
+authentication database behavior.
 
 ## Required next tests
 
 M04 needs route-shape, missing-metadata, not-found, retry, and stale-render
-checks. M05 needs database integration tests for unique emails, Argon2id
-verification, expiry/revocation, logout, cookie behavior, malformed input,
-rate limiting, and token use. These are `[TODO]`.
+checks. M05 still needs database integration tests for unique emails,
+expiry/revocation, malformed input, rate limiting, and token use. The local
+migration and endpoint flow can be exercised with `make db-migrate` and the API
+running with `DATABASE_URL` configured.
+
+Passwords are accepted from 8 through 128 characters. A local API smoke test
+should verify registration, `/auth/me`, logout, and the expected `401` after
+logout.
 
 ## Evidence
 
+- `backend/internal/auth/password_test.go`
 - `backend/internal/httpserver/server_test.go`
 - `frontend/package.json`
 - `Makefile`

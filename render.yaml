@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: mosaic-api
+    runtime: go
+    rootDir: backend
+    buildCommand: go build -o mosaic-api ./cmd/api
+    startCommand: ./mosaic-api
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_COOKIE_NAME
+        value: mosaic_session

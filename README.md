@@ -103,6 +103,42 @@ go run ./cmd/api
 
 Check <http://localhost:8080/health>.
 
+### Full local stack and authentication
+
+Create the local database environment, then apply the M05 migration:
+
+```bash
+cp .env.example .env
+make db-up
+make db-migrate
+```
+
+Set the matching PostgreSQL connection string for the Go API:
+
+```bash
+export DATABASE_URL='postgres://mosaic:change-this-local-password@127.0.0.1:5432/mosaic?sslmode=disable'
+make run
+```
+
+`make run` starts PostgreSQL, applies the idempotent auth migration, the Go
+API on `http://localhost:8080`, and Vite on `http://localhost:5173`. Open
+`/register` with a password of at least 8 characters, then sign in at
+`/login`. Authentication uses an HttpOnly session cookie; credentials are not
+stored in browser storage.
+
+During local Vite development, API requests intentionally use the relative
+`/api` proxy even if `VITE_API_BASE_URL` is present in `frontend/.env`. This
+keeps `localhost` and `127.0.0.1` browser sessions same-origin. Open the site
+from the URL printed by Vite, preferably `http://localhost:5173`.
+
+If the database container already existed before changing `POSTGRES_PASSWORD`,
+the password in `.env` must match the password stored in that PostgreSQL
+volume. Changing the environment variable does not change an existing
+database user's password. If `make run` reports password authentication failed,
+restore the original password in `.env`, or change the database password from
+inside PostgreSQL before retrying. Also stop any older frontend/backend
+processes before running `make run`, so ports `5173` and `8080` are available.
+
 ### Local database
 
 The initial local database runs as PostgreSQL through Docker Compose.
@@ -124,4 +160,3 @@ To stop the database without deleting its data:
 ```bash
 docker compose down
 ```
-
