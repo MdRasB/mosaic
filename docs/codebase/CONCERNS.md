@@ -12,6 +12,8 @@
 ## Technical debt
 
 - The current Go service does not connect to PostgreSQL.
+- PostgreSQL 18 requires its volume mounted at `/var/lib/postgresql` so the
+  image can manage its version-specific data directory.
 - `database/schema/` contains only a placeholder; versioned migrations are
   `[TODO]`.
 - Vite output is intentionally non-minified in `frontend/vite.config.js`;
