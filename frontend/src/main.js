@@ -1,6 +1,7 @@
 import { createSearchSuggestions } from "./components/search/search-suggestions.js";
 import { renderExplorePage } from "./pages/explore/explore.js";
 import { renderSearchLanding, renderSearchPage } from "./pages/search/search.js";
+import { parseMediaRoute, renderMediaDetailsPage } from "./pages/media/media-details.js";
 import { saveRecentSearch } from "./utils/recent-searches.js";
 
 const themeToggle = document.querySelector("#theme-toggle");
@@ -84,6 +85,7 @@ function isCurrentNavigationTarget(link) {
 function renderRoute() {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
+  content.mediaDetailsRenderToken = Symbol("route-change");
 
   if (path === "/" || path === "/explore") {
     renderExplorePage(content);
@@ -101,7 +103,18 @@ function renderRoute() {
     searchInput.value = query;
     renderSearchPage(content, query, params.get("type"), params.get("sort"));
   } else if (path.startsWith("/media/")) {
-    renderPlaceholder("Media details are coming in Module M04.");
+    const mediaRoute = parseMediaRoute(path);
+    if (!mediaRoute) {
+      content.classList.remove("explore-shell");
+      content.innerHTML = `
+        <section class="explore-state explore-state-empty page-placeholder">
+          <div><p class="eyebrow">Invalid media link</p><h1>That title link is not valid.</h1>
+          <p class="muted">Choose a movie or TV show from Explore or Search.</p></div>
+          <a class="button button-primary" href="/explore">Back to Explore</a>
+        </section>`;
+      return;
+    }
+    renderMediaDetailsPage(content, mediaRoute);
   } else {
     renderPlaceholder("This page is not available yet.");
   }

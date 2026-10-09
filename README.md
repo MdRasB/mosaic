@@ -23,6 +23,10 @@ violence or gore. Each section fetches additional TMDB pages until it collects
 
 ## Local development
 
+From the repository root, `make run` starts the local PostgreSQL container,
+the Go API, and the Vite development server. Use `make check` for the
+frontend build, backend tests, and Docker Compose validation.
+
 ### Frontend
 
 Use Vite for the application server:
@@ -120,5 +124,4 @@ To stop the database without deleting its data:
 ```bash
 docker compose down
 ```
-
 
