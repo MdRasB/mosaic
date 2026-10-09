@@ -95,6 +95,23 @@ function updateAuthControls() {
   profileButton.setAttribute("aria-label", currentUser ? `Open account for ${currentUser.email}` : "Open profile");
 }
 
+function updateNavigationState() {
+  const currentPath = window.location.pathname;
+  navLinks.forEach((link) => {
+    if (link.classList.contains("nav-link-disabled")) return;
+    const targetPath = new URL(link.href, window.location.origin).pathname;
+    const isExplore = (currentPath === "/" || currentPath === "/explore")
+      && (targetPath === "/" || targetPath === "/explore");
+    const isActive = isExplore || targetPath === currentPath;
+    link.classList.toggle("is-active", isActive);
+    if (isActive) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
 function safeRedirectPath(path) {
   return path.startsWith("/") && !path.startsWith("//")
     ? path
@@ -114,6 +131,7 @@ function renderRoute() {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
   content.mediaDetailsRenderToken = Symbol("route-change");
+  updateNavigationState();
 
   if (path === "/login" || path === "/register") {
     if (currentUser) {
@@ -232,6 +250,9 @@ navLinks.forEach((link) => {
     }
 
     if (!link.classList.contains("nav-link-disabled")) {
+      event.preventDefault();
+      window.history.pushState({}, "", link.href);
+      renderRoute();
       return;
     }
 
@@ -275,4 +296,4 @@ if (!window.matchMedia("(max-width: 800px)").matches) {
   setSidebarCollapsed(true);
 }
 
-renderRoute();
+loadSession().then(renderRoute);
