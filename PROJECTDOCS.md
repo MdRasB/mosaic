@@ -6,10 +6,10 @@ application: visitors can explore TMDB-powered media rows, search movies and
 TV shows, inspect search suggestions, switch themes, and use the responsive
 desktop/mobile shell.
 
-The repository also contains a Go API foundation and PostgreSQL Docker
-scaffolding for later modules. Authentication, collections, favorites,
-watchlists, ratings, reviews, media details, and user data persistence are
-planned but are not implemented in the current source tree.
+The repository also contains a Go API foundation, PostgreSQL Docker
+scaffolding, and the public M04 media-details page. Authentication,
+collections, favorites, watchlists, ratings, reviews, and user data persistence
+remain planned for later modules.
 
 > **Current implementation note:** This document describes what exists in the
 > repository today. Planned directories are preserved with `.gitkeep` files,
@@ -38,11 +38,12 @@ planned but are not implemented in the current source tree.
 - Supports dark/light theme persistence through `localStorage`.
 - Provides a Go `/health` endpoint.
 - Provides local PostgreSQL infrastructure through Docker Compose.
+- Provides public `/media/movie/:id` and `/media/tv/:id` details pages with
+  loading, invalid-route, retry, related-media, and metadata states.
 
 ### What is not implemented yet
 
 - Authentication and account management.
-- Media details pages.
 - User collections, favorites, and watchlists.
 - Ratings, reviews, social features, and profile pages.
 - Supabase integration and row-level security.
@@ -62,6 +63,9 @@ planned but are not implemented in the current source tree.
 | [`docs/codebase/INTEGRATIONS.md`](docs/codebase/INTEGRATIONS.md) | External services and integration concerns |
 | [`docs/codebase/TESTING.md`](docs/codebase/TESTING.md) | Current test commands and coverage gaps |
 | [`docs/codebase/CONCERNS.md`](docs/codebase/CONCERNS.md) | Current risks, technical debt, and scaling concerns |
+| [`docs/Mosaic_Project_Complete_Plan_Final.md`](docs/Mosaic_Project_Complete_Plan_Final.md) | Canonical project plan and module roadmap |
+| [`docs/M04-M05-MERGED-PLAN.md`](docs/M04-M05-MERGED-PLAN.md) | Reconciled M04/M05 implementation plan |
+| [`docs/deployment/FREE-HOSTING.md`](docs/deployment/FREE-HOSTING.md) | Free hosting and local deployment model |
 
 ## Project structure
 

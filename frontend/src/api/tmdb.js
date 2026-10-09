@@ -5,6 +5,7 @@ const restrictedContentPattern = /\b(?:adult|bondage|erotic|xxx|porn(?:ographic)
 const TARGET_ROW_SIZE = 20;
 const MAX_PAGES_PER_SECTION = 5;
 const SUGGESTION_LIMIT = 8;
+const MEDIA_TYPES = new Set(["movie", "tv"]);
 
 function getApiKey() {
   const apiKey = import.meta.env?.VITE_TMDB_API_KEY || window.MOSAIC_CONFIG?.tmdbApiKey;
@@ -217,5 +218,65 @@ export async function searchMedia(query, page = 1) {
     page: data.page ?? page,
     totalPages: data.total_pages ?? page,
     totalResults: data.total_results ?? 0
+  };
+}
+
+export async function getMediaDetails(type, id) {
+  if (!MEDIA_TYPES.has(type) || !Number.isInteger(id) || id <= 0) {
+    throw new Error("Invalid media route.");
+  }
+
+  const data = await request(`/${type}/${id}`, {
+    append_to_response: "credits,videos,similar,watch/providers",
+    include_image_language: "en,null"
+  });
+  const media = normalizeMedia(data, type);
+  const cast = (data.credits?.cast ?? [])
+    .filter((person) => person.id && person.name)
+    .slice(0, 8)
+    .map((person) => ({
+      id: person.id,
+      name: person.name,
+      character: person.character ?? "",
+      profileUrl: imageUrl(person.profile_path, "w185")
+    }));
+  const creators = (type === "tv" ? data.created_by ?? [] : data.credits?.crew ?? [])
+    .filter((person) => person.name && (type === "tv" || person.job === "Director"))
+    .slice(0, 6)
+    .map((person) => ({ id: person.id, name: person.name, profileUrl: imageUrl(person.profile_path, "w185") }));
+  const videos = (data.videos?.results ?? [])
+    .filter((video) => video.site === "YouTube" && video.key && ["Trailer", "Teaser"].includes(video.type))
+    .slice(0, 3)
+    .map((video) => ({ name: video.name, key: video.key }));
+  const providers = data["watch/providers"]?.results?.US;
+  const related = (data.similar?.results ?? [])
+    .filter((item) => !isRestrictedContent(item))
+    .slice(0, 12)
+    .map((item) => normalizeMedia(item, type));
+
+  return {
+    ...media,
+    runtime: data.runtime ?? null,
+    episodeRuntime: data.episode_run_time?.[0] ?? null,
+    seasons: data.number_of_seasons ?? null,
+    episodes: data.number_of_episodes ?? null,
+    genres: (data.genres ?? []).map((genre) => genre.name).filter(Boolean),
+    status: data.status ?? "",
+    tagline: data.tagline ?? "",
+    cast,
+    creators,
+    videos,
+    providers: [
+      ...(providers?.flatrate ?? []),
+      ...(providers?.rent ?? []),
+      ...(providers?.buy ?? [])
+    ].filter((provider, index, list) =>
+      provider.provider_id && list.findIndex((item) => item.provider_id === provider.provider_id) === index
+    ).slice(0, 6).map((provider) => ({
+      name: provider.provider_name,
+      logoUrl: imageUrl(provider.logo_path, "w92")
+    })),
+    providerLink: providers?.link ?? "",
+    related
   };
 }
