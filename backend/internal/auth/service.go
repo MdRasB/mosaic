@@ -69,6 +69,10 @@ func (s *Service) Register(ctx context.Context, email, password string) (User, s
 		}
 		return User{}, "", fmt.Errorf("insert user: %w", err)
 	}
+	if _, err = tx.Exec(ctx, `INSERT INTO user_profiles (user_id, username, display_name)
+		VALUES ($1, $2, $3)`, userID, defaultUsername(userID), "Mosaic User"); err != nil {
+		return User{}, "", fmt.Errorf("insert user profile: %w", err)
+	}
 	if _, err = tx.Exec(ctx, `INSERT INTO sessions (id, user_id, token_hash, expires_at) VALUES ($1, $2, $3, $4)`,
 		sessionID, userID, sessionHash, time.Now().UTC().Add(7*24*time.Hour)); err != nil {
 		return User{}, "", fmt.Errorf("insert session: %w", err)
@@ -160,4 +164,8 @@ func hashToken(token string) string {
 
 func newID() (string, error) {
 	return newToken()
+}
+
+func defaultUsername(userID string) string {
+	return "u_" + userID[:22]
 }
