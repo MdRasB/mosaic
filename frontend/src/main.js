@@ -4,6 +4,8 @@ import { renderSearchLanding, renderSearchPage } from "./pages/search/search.js"
 import { parseMediaRoute, renderMediaDetailsPage } from "./pages/media/media-details.js";
 import { authService } from "./auth/auth-service.js";
 import { renderAuthPage, renderDashboard } from "./pages/auth/auth.js";
+import { renderProfilePage } from "./pages/profile/profile.js";
+import { renderProfileSettings } from "./pages/profile/profile-settings.js";
 import { saveRecentSearch } from "./utils/recent-searches.js";
 
 const themeToggle = document.querySelector("#theme-toggle");
@@ -93,6 +95,12 @@ function updateAuthControls() {
   profileButton.setAttribute("aria-label", currentUser ? `Open account for ${currentUser.email}` : "Open profile");
 }
 
+function safeRedirectPath(path) {
+  return path.startsWith("/") && !path.startsWith("//")
+    ? path
+    : "/dashboard";
+}
+
 async function loadSession() {
   try {
     currentUser = await authService.me();
@@ -115,12 +123,21 @@ function renderRoute() {
     }
     renderAuthPage(content, path.slice(1), () => {
       const destination = new URLSearchParams(window.location.search).get("redirect");
-      const safeDestination = destination?.startsWith("/") && !destination.startsWith("//")
-        ? destination
-        : "/dashboard";
+      const safeDestination = safeRedirectPath(destination ?? "/dashboard");
       window.history.pushState({}, "", safeDestination);
       loadSession().then(renderRoute);
     });
+  } else if (path === "/profile" || path === "/settings/profile") {
+    if (!currentUser) {
+      window.history.replaceState({}, "", `/login?redirect=${encodeURIComponent(path)}`);
+      loadSession().then(renderRoute);
+      return;
+    }
+    if (path === "/profile") {
+      renderProfilePage(content);
+    } else {
+      renderProfileSettings(content);
+    }
   } else if (path === "/dashboard") {
     if (!currentUser) {
       window.history.replaceState({}, "", `/login?redirect=${encodeURIComponent(path)}`);
@@ -198,7 +215,7 @@ registerButton.addEventListener("click", () => {
 });
 profileButton.addEventListener("click", () => {
   if (currentUser) {
-    window.history.pushState({}, "", "/dashboard");
+    window.history.pushState({}, "", "/profile");
     renderRoute();
   } else {
     showMessage("Sign in to open your profile.");
@@ -250,7 +267,7 @@ searchForm.addEventListener("submit", (event) => {
 
 window.addEventListener("popstate", () => {
   searchSuggestions.close();
-  renderRoute();
+  loadSession().then(renderRoute);
 });
 
 restoreTheme();
