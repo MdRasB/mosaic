@@ -28,7 +28,11 @@ db-down:
 	docker compose down
 
 db-migrate:
-	docker compose exec -T database psql -U "$${POSTGRES_USER:-mosaic}" -d "$${POSTGRES_DB:-mosaic}" < database/migrations/000001_auth.sql
+	@set -eu; \
+	for migration in supabase/migrations/*.sql; do \
+		echo "Applying $$migration"; \
+		docker compose exec -T database psql -U "$${POSTGRES_USER:-mosaic}" -d "$${POSTGRES_DB:-mosaic}" < "$$migration"; \
+	done
 
 build:
 	cd frontend && npm run build

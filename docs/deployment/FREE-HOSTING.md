@@ -48,6 +48,40 @@ providers avoids coupling the database lifecycle to the sleeping Go service.
 6. Consider Cloudflare Workers + D1 only as a deliberate future migration,
    not as a parallel database.
 
+## Automated Supabase migrations
+
+Database migrations are stored in `supabase/migrations/` and applied locally by
+`make db-migrate`. The `Apply Supabase migrations` GitHub Actions workflow runs
+when migration files are pushed to the `deploy` branch, then executes
+`supabase db push` against the configured Supabase database. It does not run
+arbitrary SQL from the frontend or backend deployment.
+
+Configure one GitHub Actions production-environment secret:
+
+```text
+SUPABASE_DB_URL=the complete Supabase PostgreSQL connection string
+```
+
+Use a Supabase pooler connection suitable for persistent external services when
+Supabase provides one. Keep this secret only in GitHub Actions and never commit
+it, place it in Cloudflare Pages, or place it in frontend configuration.
+
+The first migration is:
+
+```text
+supabase/migrations/20261009120000_auth.sql
+```
+
+After the one-time secret setup, future schema changes use the normal workflow:
+
+```text
+add a new migration
+→ merge the feature PR into main
+→ sync main into deploy
+→ push deploy
+→ GitHub Actions applies pending Supabase migrations
+```
+
 ## Required deployment configuration
 
 ### Cloudflare Pages
@@ -74,7 +108,8 @@ providers avoids coupling the database lifecycle to the sleeping Go service.
 Use the direct PostgreSQL connection string as `DATABASE_URL` in Render,
 with the TLS mode required by the provider. Apply versioned migrations
 against both a fresh local database and the remote database. Do not rely only
-on Docker's first-volume initialization hook.
+on Docker's first-volume initialization hook. The migration workflow uses the
+same versioned files as local development.
 
 ## Local commands
 
