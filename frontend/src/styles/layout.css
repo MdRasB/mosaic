@@ -140,14 +140,16 @@ input {
   outline-offset: 2px;
 }
 
+.nav-link-disabled:hover {
+  background: var(--color-surface-raised);
+  box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 12%);
+  color: var(--color-muted);
+  transform: translate3d(0.2rem, -0.1rem, 0) scale(1.02);
+}
+
 .nav-link-disabled {
   cursor: not-allowed;
   opacity: 0.62;
-}
-
-.nav-link-disabled:hover {
-  background: transparent;
-  color: var(--color-muted);
 }
 
 .nav-link.is-active {
