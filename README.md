@@ -115,8 +115,8 @@ make db-migrate
 ```
 
 The schema source of truth is `supabase/migrations/`. Local development applies
-those files to Docker PostgreSQL. On the `deploy` branch, GitHub Actions applies
-pending files to Supabase using the repository's production migration workflow.
+those files to Docker PostgreSQL. The Supabase GitHub integration applies
+pending files to Supabase when the configured production branch is updated.
 
 Set the matching PostgreSQL connection string for the Go API:
 
@@ -125,11 +125,16 @@ export DATABASE_URL='postgres://mosaic:change-this-local-password@127.0.0.1:5432
 make run
 ```
 
-`make run` starts PostgreSQL, applies the idempotent auth migration, the Go
+`make run` starts PostgreSQL, applies the idempotent migrations, the Go
 API on `http://localhost:8080`, and Vite on `http://localhost:5173`. Open
 `/register` with a password of at least 8 characters, then sign in at
 `/login`. Authentication uses an HttpOnly session cookie; credentials are not
 stored in browser storage.
+
+Authenticated profile routes are `/profile` and `/settings/profile`. Profile
+reads and updates go through the Go API (`/api/v1/profile/me`); the browser
+never connects directly to Supabase. Apply the profile migration before
+deploying a backend version that provisions profiles during registration.
 
 During local Vite development, API requests intentionally use the relative
 `/api` proxy even if `VITE_API_BASE_URL` is present in `frontend/.env`. This
