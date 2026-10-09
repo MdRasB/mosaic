@@ -1,0 +1,40 @@
+name: Apply Supabase migrations
+
+on:
+  push:
+    branches:
+      - deploy
+    paths:
+      - supabase/migrations/**
+      - .github/workflows/supabase-migrations.yml
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-migrations
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Apply database migrations
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+    steps:
+      - name: Check out deployment branch
+        uses: actions/checkout@v4
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Apply pending migrations
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::The SUPABASE_DB_URL production secret is not configured."
+            exit 1
+          fi
+          supabase db push --db-url "$SUPABASE_DB_URL"
