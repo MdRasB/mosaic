@@ -1,0 +1,120 @@
+.profile-page {
+  display: grid;
+  gap: var(--space-6);
+  margin: 0 auto;
+  max-width: 860px;
+  padding: var(--space-6) 0;
+}
+
+.profile-heading {
+  align-items: end;
+  display: flex;
+  gap: var(--space-5);
+  justify-content: space-between;
+}
+
+.profile-card, .profile-form {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: clamp(var(--space-5), 5vw, var(--space-8));
+}
+
+.profile-identity {
+  align-items: center;
+  display: flex;
+  gap: var(--space-4);
+}
+
+.profile-avatar {
+  align-items: center;
+  background: var(--color-surface-raised);
+  border-radius: 50%;
+  display: flex;
+  flex: 0 0 84px;
+  height: 84px;
+  justify-content: center;
+  overflow: hidden;
+  width: 84px;
+}
+
+.profile-avatar-image {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.profile-avatar-fallback {
+  color: var(--color-primary);
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.profile-username, .profile-member, .field-help {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.profile-bio {
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+}
+
+.profile-visibility {
+  align-items: center;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+}
+
+.profile-form {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.profile-form label {
+  display: grid;
+  gap: var(--space-2);
+  font-weight: 700;
+}
+
+.profile-form input, .profile-form textarea, .profile-form select {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font: inherit;
+  padding: 0.8rem 0.9rem;
+  width: 100%;
+}
+
+.profile-form textarea {
+  resize: vertical;
+}
+
+.profile-form-message {
+  color: var(--color-primary);
+  min-height: 1.3rem;
+}
+
+.profile-state {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  margin: 15vh auto;
+  max-width: 680px;
+  padding: var(--space-6);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .profile-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+}
