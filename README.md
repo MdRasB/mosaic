@@ -105,13 +105,17 @@ Check <http://localhost:8080/health>.
 
 ### Full local stack and authentication
 
-Create the local database environment, then apply the M05 migration:
+Create the local database environment, then apply the versioned migrations:
 
 ```bash
 cp .env.example .env
 make db-up
 make db-migrate
 ```
+
+The schema source of truth is `supabase/migrations/`. Local development applies
+those files to Docker PostgreSQL. On the `deploy` branch, GitHub Actions applies
+pending files to Supabase using the repository's production migration workflow.
 
 Set the matching PostgreSQL connection string for the Go API:
 
