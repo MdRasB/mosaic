@@ -1,4 +1,5 @@
-const API_ORIGIN = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+const configuredAPIOrigin = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+const API_ORIGIN = import.meta.env.DEV ? "" : configuredAPIOrigin;
 const API_PREFIX = `${API_ORIGIN}/api/v1`;
 
 export async function requestJSON(path, options = {}) {
