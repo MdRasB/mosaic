@@ -6,6 +6,7 @@ import (
 
 	"github.com/MdRasB/mosaic/backend/internal/auth"
 	"github.com/MdRasB/mosaic/backend/internal/config"
+	"github.com/MdRasB/mosaic/backend/internal/profile"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -13,11 +14,14 @@ func New(cfg config.Config, pool *pgxpool.Pool) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", healthHandler)
 	if pool != nil {
-		authHandler := auth.NewHandler(auth.NewService(pool), cfg)
+		authService := auth.NewService(pool)
+		authHandler := auth.NewHandler(authService, cfg)
+		profileHandler := profile.NewHandler(profile.NewService(pool), authService, cfg)
 		mux.HandleFunc("/api/v1/auth/register", authHandler.Register)
 		mux.HandleFunc("/api/v1/auth/login", authHandler.Login)
 		mux.HandleFunc("/api/v1/auth/me", authHandler.Me)
 		mux.HandleFunc("/api/v1/auth/logout", authHandler.Logout)
+		mux.HandleFunc("/api/v1/profile/me", profileHandler.Me)
 	}
 
 	return withCORS(cfg.AllowedOrigin, mux)
@@ -35,8 +39,14 @@ func healthHandler(writer http.ResponseWriter, request *http.Request) {
 
 func withCORS(allowedOrigin string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.Method != http.MethodGet && request.Method != http.MethodOptions {
+			if origin := request.Header.Get("Origin"); origin != "" && origin != allowedOrigin {
+				http.Error(writer, "forbidden origin", http.StatusForbidden)
+				return
+			}
+		}
 		writer.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
-		writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
 		writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		writer.Header().Set("Vary", "Origin")
