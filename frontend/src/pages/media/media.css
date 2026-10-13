@@ -1,0 +1,257 @@
+.media-details-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding-bottom: var(--space-10);
+}
+
+.media-details-hero {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.media-details-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(8px) brightness(0.25);
+  transform: scale(1.05);
+  z-index: 0;
+}
+
+.media-details-hero-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-6);
+  padding: var(--space-8);
+  background: linear-gradient(to right, rgba(10, 15, 29, 0.92) 30%, rgba(10, 15, 29, 0.65) 100%);
+  color: #ffffff;
+}
+
+.media-details-poster-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.media-details-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.media-details-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  justify-content: center;
+}
+
+.media-details-info .eyebrow {
+  color: var(--color-primary);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.media-details-info h1 {
+  font-size: 2.2rem;
+  line-height: 1.15;
+  margin: 0;
+  color: #ffffff;
+}
+
+.media-tagline {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.media-details-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.media-rating-badge {
+  background: var(--color-primary);
+  color: var(--color-primary-ink);
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.media-genre-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.media-genre-pill {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.media-overview {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 80ch;
+  margin: 0;
+}
+
+.media-crew-line {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: var(--space-2);
+}
+
+.media-crew-line strong {
+  color: #ffffff;
+}
+
+/* Sections */
+.media-section-heading {
+  margin-bottom: var(--space-4);
+}
+
+.media-section-heading h2 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+/* Cast Grid */
+.media-cast-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--space-3);
+}
+
+.cast-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.cast-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1.25;
+  object-fit: cover;
+}
+
+.cast-card-fallback {
+  width: 100%;
+  aspect-ratio: 1 / 1.25;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(128, 128, 128, 0.1);
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.cast-card-info {
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cast-name {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.cast-character {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+/* Video / Trailer */
+.media-video-container {
+  aspect-ratio: 16 / 9;
+  max-width: 800px;
+  background: #000;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.media-video-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Watch Providers */
+.watch-providers-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.watch-providers-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.provider-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.provider-badge img {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .media-details-hero-content {
+    grid-template-columns: 1fr;
+    padding: var(--space-5);
+  }
+
+  .media-details-poster-wrap {
+    max-width: 200px;
+  }
+
+  .media-details-info h1 {
+    font-size: 1.6rem;
+  }
+}

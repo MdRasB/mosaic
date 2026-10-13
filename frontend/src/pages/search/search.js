@@ -135,7 +135,7 @@ export async function renderSearchPage(container, query, initialFilter = "all") 
         return;
       }
 
-      grid.innerHTML = errorState("Could not complete your search.", "search");
+      grid.innerHTML = errorState(error?.message || "Could not complete your search.", "search");
       footer.innerHTML = "";
       console.error(`Unable to search for "${query}".`, error);
 

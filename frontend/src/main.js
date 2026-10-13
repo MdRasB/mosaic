@@ -1,6 +1,7 @@
 import { createSearchSuggestions } from "./components/search/search-suggestions.js";
 import { renderExplorePage } from "./pages/explore/explore.js";
 import { renderSearchPage } from "./pages/search/search.js";
+import { renderMediaPage } from "./pages/media/media.js";
 
 const themeToggle = document.querySelector("#theme-toggle");
 const appShell = document.querySelector(".app-shell");
@@ -98,7 +99,15 @@ function renderRoute() {
     searchInput.value = query;
     renderSearchPage(content, query, params.get("type"));
   } else if (path.startsWith("/media/")) {
-    renderPlaceholder("Media details are coming in Module M04.");
+    const segments = path.split("/").filter(Boolean);
+    const mediaType = segments[1] || "movie";
+    const mediaId = segments[2];
+
+    if (mediaId) {
+      renderMediaPage(content, mediaType, mediaId);
+    } else {
+      renderPlaceholder("Media ID was not specified.");
+    }
   } else {
     renderPlaceholder("This page is not available yet.");
   }
@@ -181,6 +190,16 @@ searchForm.addEventListener("submit", (event) => {
 window.addEventListener("popstate", () => {
   searchSuggestions.close();
   renderRoute();
+});
+
+content.addEventListener("click", (event) => {
+  const mediaLink = event.target.closest("a[data-media-card], a[href^='/media/']");
+  if (mediaLink) {
+    event.preventDefault();
+    const href = mediaLink.getAttribute("href");
+    window.history.pushState({}, "", href);
+    renderRoute();
+  }
 });
 
 restoreTheme();
