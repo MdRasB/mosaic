@@ -35,7 +35,9 @@ Equivalent frontend/backend commands are documented in `README.md`.
 - Backend `PORT` and `CORS_ALLOWED_ORIGINS` are read by
   `backend/internal/config/config.go`.
 - Backend `DATABASE_URL`, `SESSION_COOKIE_NAME`, and `APP_ENV` configure
-  authentication and session cookies.
+  authentication and session cookies. Production uses `Secure` and
+  `SameSite=None` for the cross-site Cloudflare Pages/Render deployment;
+  local development uses `SameSite=Lax`.
 
 ## Evidence
 

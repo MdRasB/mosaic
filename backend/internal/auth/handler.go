@@ -101,7 +101,7 @@ func (h *Handler) sessionToken(r *http.Request) string {
 func (h *Handler) setSessionCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
 		Name: h.config.SessionCookie, Value: token, Path: "/",
-		HttpOnly: true, Secure: h.config.SecureCookies, SameSite: http.SameSiteLaxMode,
+		HttpOnly: true, Secure: h.config.SecureCookies, SameSite: h.config.SessionSameSite,
 		Expires: time.Now().UTC().Add(7 * 24 * time.Hour), MaxAge: 7 * 24 * 60 * 60,
 	})
 }
@@ -109,7 +109,7 @@ func (h *Handler) setSessionCookie(w http.ResponseWriter, token string) {
 func (h *Handler) clearSessionCookie(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name: h.config.SessionCookie, Value: "", Path: "/",
-		HttpOnly: true, Secure: h.config.SecureCookies, SameSite: http.SameSiteLaxMode,
+		HttpOnly: true, Secure: h.config.SecureCookies, SameSite: h.config.SessionSameSite,
 		Expires: time.Unix(0, 0), MaxAge: -1,
 	})
 }
