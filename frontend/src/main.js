@@ -1,6 +1,11 @@
 import { createSearchSuggestions } from "./components/search/search-suggestions.js";
 import { renderExplorePage } from "./pages/explore/explore.js";
 import { renderSearchLanding, renderSearchPage } from "./pages/search/search.js";
+import { parseMediaRoute, renderMediaDetailsPage } from "./pages/media/media-details.js";
+import { authService } from "./auth/auth-service.js";
+import { renderAuthPage, renderDashboard } from "./pages/auth/auth.js";
+import { renderProfilePage } from "./pages/profile/profile.js";
+import { renderProfileSettings } from "./pages/profile/profile-settings.js";
 import { saveRecentSearch } from "./utils/recent-searches.js";
 
 const themeToggle = document.querySelector("#theme-toggle");
@@ -17,6 +22,7 @@ const themeStorageKey = "mosaic-theme";
 const content = document.querySelector("#app-content");
 const searchForm = document.querySelector("#global-search-form");
 const searchInput = document.querySelector("#global-search");
+let currentUser = null;
 
 function setTheme(isLight, { persist = true } = {}) {
   document.documentElement.toggleAttribute("data-theme", isLight);
@@ -81,11 +87,89 @@ function isCurrentNavigationTarget(link) {
   );
 }
 
+function updateAuthControls() {
+  loginButton.hidden = Boolean(currentUser);
+  registerButton.hidden = Boolean(currentUser);
+  profileButton.hidden = !currentUser;
+  profileButton.textContent = currentUser ? currentUser.email.slice(0, 2).toUpperCase() : "MR";
+  profileButton.setAttribute("aria-label", currentUser ? `Open account for ${currentUser.email}` : "Open profile");
+}
+
+function updateNavigationState() {
+  const currentPath = window.location.pathname;
+  navLinks.forEach((link) => {
+    if (link.classList.contains("nav-link-disabled")) return;
+    const targetPath = new URL(link.href, window.location.origin).pathname;
+    const isExplore = (currentPath === "/" || currentPath === "/explore")
+      && (targetPath === "/" || targetPath === "/explore");
+    const isActive = isExplore || targetPath === currentPath;
+    link.classList.toggle("is-active", isActive);
+    if (isActive) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+function safeRedirectPath(path) {
+  return path.startsWith("/") && !path.startsWith("//")
+    ? path
+    : "/dashboard";
+}
+
+async function loadSession() {
+  try {
+    currentUser = await authService.me();
+  } catch {
+    currentUser = null;
+  }
+  updateAuthControls();
+}
+
 function renderRoute() {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
+  content.mediaDetailsRenderToken = Symbol("route-change");
+  updateNavigationState();
 
-  if (path === "/" || path === "/explore") {
+  if (path === "/login" || path === "/register") {
+    if (currentUser) {
+      window.history.replaceState({}, "", "/dashboard");
+      loadSession().then(renderRoute);
+      return;
+    }
+    renderAuthPage(content, path.slice(1), () => {
+      const destination = new URLSearchParams(window.location.search).get("redirect");
+      const safeDestination = safeRedirectPath(destination ?? "/dashboard");
+      window.history.pushState({}, "", safeDestination);
+      loadSession().then(renderRoute);
+    });
+  } else if (path === "/profile" || path === "/settings/profile") {
+    if (!currentUser) {
+      window.history.replaceState({}, "", `/login?redirect=${encodeURIComponent(path)}`);
+      loadSession().then(renderRoute);
+      return;
+    }
+    if (path === "/profile") {
+      renderProfilePage(content);
+    } else {
+      renderProfileSettings(content);
+    }
+  } else if (path === "/dashboard") {
+    if (!currentUser) {
+      window.history.replaceState({}, "", `/login?redirect=${encodeURIComponent(path)}`);
+      renderRoute();
+      return;
+    }
+    renderDashboard(content, currentUser, async () => {
+      await authService.logout();
+      currentUser = null;
+      updateAuthControls();
+      window.history.pushState({}, "", "/explore");
+      renderRoute();
+    });
+  } else if (path === "/" || path === "/explore") {
     renderExplorePage(content);
   } else if (path === "/search") {
     const query = params.get("q")?.trim();
@@ -101,7 +185,18 @@ function renderRoute() {
     searchInput.value = query;
     renderSearchPage(content, query, params.get("type"), params.get("sort"));
   } else if (path.startsWith("/media/")) {
-    renderPlaceholder("Media details are coming in Module M04.");
+    const mediaRoute = parseMediaRoute(path);
+    if (!mediaRoute) {
+      content.classList.remove("explore-shell");
+      content.innerHTML = `
+        <section class="explore-state explore-state-empty page-placeholder">
+          <div><p class="eyebrow">Invalid media link</p><h1>That title link is not valid.</h1>
+          <p class="muted">Choose a movie or TV show from Explore or Search.</p></div>
+          <a class="button button-primary" href="/explore">Back to Explore</a>
+        </section>`;
+      return;
+    }
+    renderMediaDetailsPage(content, mediaRoute);
   } else {
     renderPlaceholder("This page is not available yet.");
   }
@@ -130,14 +225,20 @@ sidebarOverlay.addEventListener("click", () => {
   sidebarToggle.setAttribute("aria-label", "Open sidebar");
 });
 
-// M05 authentication is not implemented yet; these controls document the planned public header.
 loginButton.addEventListener("click", () => {
   window.location.href = "/login";
 });
 registerButton.addEventListener("click", () => {
   window.location.href = "/register";
 });
-profileButton.addEventListener("click", () => showMessage("Profile will be available in Module M06."));
+profileButton.addEventListener("click", () => {
+  if (currentUser) {
+    window.history.pushState({}, "", "/profile");
+    renderRoute();
+  } else {
+    showMessage("Sign in to open your profile.");
+  }
+});
 
 navLinks.forEach((link) => {
   link.addEventListener("click", (event) => {
@@ -149,6 +250,9 @@ navLinks.forEach((link) => {
     }
 
     if (!link.classList.contains("nav-link-disabled")) {
+      event.preventDefault();
+      window.history.pushState({}, "", link.href);
+      renderRoute();
       return;
     }
 
@@ -168,7 +272,7 @@ function submitSearchQuery(rawQuery) {
   saveRecentSearch(query);
   searchInput.value = query;
   window.history.pushState({}, "", `/search?q=${encodeURIComponent(query)}`);
-  renderRoute();
+  loadSession().then(renderRoute);
 }
 
 const searchSuggestions = createSearchSuggestions({
@@ -184,7 +288,7 @@ searchForm.addEventListener("submit", (event) => {
 
 window.addEventListener("popstate", () => {
   searchSuggestions.close();
-  renderRoute();
+  loadSession().then(renderRoute);
 });
 
 restoreTheme();
@@ -192,4 +296,4 @@ if (!window.matchMedia("(max-width: 800px)").matches) {
   setSidebarCollapsed(true);
 }
 
-renderRoute();
+loadSession().then(renderRoute);

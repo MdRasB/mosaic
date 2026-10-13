@@ -23,6 +23,10 @@ violence or gore. Each section fetches additional TMDB pages until it collects
 
 ## Local development
 
+From the repository root, `make run` starts the local PostgreSQL container,
+the Go API, and the Vite development server. Use `make check` for the
+frontend build, backend tests, and Docker Compose validation.
+
 ### Frontend
 
 Use Vite for the application server:
@@ -80,6 +84,7 @@ Set this production environment variable in Cloudflare Pages:
 
 ```text
 VITE_TMDB_API_KEY=your_tmdb_key
+VITE_API_BASE_URL=https://mosaic-api-5q09.onrender.com
 ```
 
 Cloudflare Pages runs the Vite build with that variable; do not upload
@@ -98,6 +103,51 @@ go run ./cmd/api
 ```
 
 Check <http://localhost:8080/health>.
+
+### Full local stack and authentication
+
+Create the local database environment, then apply the versioned migrations:
+
+```bash
+cp .env.example .env
+make db-up
+make db-migrate
+```
+
+The schema source of truth is `supabase/migrations/`. Local development applies
+those files to Docker PostgreSQL. The Supabase GitHub integration applies
+pending files to Supabase when the configured production branch is updated.
+
+Set the matching PostgreSQL connection string for the Go API:
+
+```bash
+export DATABASE_URL='postgres://mosaic:change-this-local-password@127.0.0.1:5432/mosaic?sslmode=disable'
+make run
+```
+
+`make run` starts PostgreSQL, applies the idempotent migrations, the Go
+API on `http://localhost:8080`, and Vite on `http://localhost:5173`. Open
+`/register` with a password of at least 8 characters, then sign in at
+`/login`. Authentication uses an HttpOnly session cookie; credentials are not
+stored in browser storage.
+
+Authenticated profile routes are `/profile` and `/settings/profile`. Profile
+reads and updates go through the Go API (`/api/v1/profile/me`); the browser
+never connects directly to Supabase. Apply the profile migration before
+deploying a backend version that provisions profiles during registration.
+
+During local Vite development, API requests intentionally use the relative
+`/api` proxy even if `VITE_API_BASE_URL` is present in `frontend/.env`. This
+keeps `localhost` and `127.0.0.1` browser sessions same-origin. Open the site
+from the URL printed by Vite, preferably `http://localhost:5173`.
+
+If the database container already existed before changing `POSTGRES_PASSWORD`,
+the password in `.env` must match the password stored in that PostgreSQL
+volume. Changing the environment variable does not change an existing
+database user's password. If `make run` reports password authentication failed,
+restore the original password in `.env`, or change the database password from
+inside PostgreSQL before retrying. Also stop any older frontend/backend
+processes before running `make run`, so ports `5173` and `8080` are available.
 
 ### Local database
 
@@ -120,5 +170,3 @@ To stop the database without deleting its data:
 ```bash
 docker compose down
 ```
-
-
