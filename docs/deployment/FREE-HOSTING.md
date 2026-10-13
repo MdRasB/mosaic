@@ -121,9 +121,13 @@ make check
 ```
 
 For a deployed frontend, set `VITE_API_BASE_URL` to the Render API origin and
-set `CORS_ALLOWED_ORIGINS` to the exact Cloudflare Pages origin. Cookies remain
-credentialed and are issued by the API; verify the production browser flow
-before treating the deployment as complete.
+set `CORS_ALLOWED_ORIGINS` to the exact Cloudflare Pages origin. Set
+`APP_ENV=production` in Render. Production cookies are issued with
+`HttpOnly; Secure; SameSite=None` because Cloudflare Pages and Render are
+cross-site origins. Local development keeps `SameSite=Lax` and does not require
+HTTPS. After changing these variables, redeploy the Render service and clear
+the old `mosaic_session` cookie before testing login, registration, logout, and
+page refresh.
 
 The official platform pages should be checked before deployment because free
 limits and policies change:
