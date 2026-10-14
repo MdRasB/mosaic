@@ -16,7 +16,8 @@
 `frontend/index.html` loads `frontend/src/main.js`. `main.js` handles the
 client-side route switch and shell events. Page modules live under
 `frontend/src/pages/`; shared renderers live under `frontend/src/components/`;
-TMDB access is centralized in `frontend/src/api/tmdb.js`.
+TMDB access is centralized in `frontend/src/api/tmdb.js`, while collection
+requests are centralized in `frontend/src/collection/collection-service.js`.
 
 ## Current page modules
 
@@ -26,13 +27,14 @@ TMDB access is centralized in `frontend/src/api/tmdb.js`.
 - `pages/auth/`: login, registration, and dashboard placeholder.
 - `pages/profile/`: profile card and editable settings, including avatar upload
   controls.
+- `pages/collection/`: authenticated collection and favorites pages.
 
 ## Backend entry points
 
 `backend/cmd/api/main.go` loads configuration, creates the HTTP server, and
-handles graceful shutdown. `backend/internal/httpserver/server.go` currently
-owns `/health` and CORS. `backend/internal/config/config.go` owns environment
-defaults.
+handles graceful shutdown. `backend/internal/httpserver/server.go` owns `/health`, auth, profile,
+collection, favorite routes, and CORS. `backend/internal/config/config.go`
+owns environment defaults.
 
 ## Evidence
 
@@ -41,4 +43,7 @@ defaults.
 - `frontend/src/pages/media/media-details.js`
 - `backend/cmd/api/main.go`
 - `backend/internal/httpserver/server.go`
+- `backend/internal/domain/collection/handler.go`
+- `backend/internal/domain/collection/service.go`
+- `supabase/migrations/20261015120000_collection_favorites.sql`
 - `compose.yml`

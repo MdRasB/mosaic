@@ -30,7 +30,11 @@ multipart boundary.
 | `pages/` | Page markup, page requests, page state | `frontend/src/pages/` |
 | `components/` | Reusable media/state markup | `frontend/src/components/` |
 | `api/` | TMDB request, caching, normalization | `frontend/src/api/tmdb.js` |
+| `collection/` | Collection/favorite API requests | `frontend/src/collection/collection-service.js` |
 | Go `httpserver` | HTTP handlers and CORS | `backend/internal/httpserver/server.go` |
+- `backend/internal/domain/collection/handler.go`
+- `backend/internal/domain/collection/service.go`
+- `supabase/migrations/20261015120000_collection_favorites.sql`
 | Go `auth`/`profile` | Sessions, profile validation, avatar persistence | `backend/internal/auth`, `backend/internal/profile` |
 | Supabase PostgreSQL | Users, sessions, profiles, avatar bytes | `supabase/migrations/`, `backend/internal/profile/service.go` |
 | Compose/database | Local PostgreSQL lifecycle | `compose.yml` |
