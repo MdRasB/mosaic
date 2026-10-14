@@ -239,11 +239,7 @@ It:
 - rejects focused sexual-content terms in title, name, and overview;
 - excludes people from multi-search and trending rows;
 - fetches additional pages for Explore sections until the safe-title target is
-  reached or the page limit is exhausted;
-- enforces request timeouts (10s default) via `AbortController`;
-- categorizes provider errors with `TmdbError` (401 auth, 404 not found, 429 rate limit, 5xx server, network errors);
-- provides endpoints for M04 media details, cast credits, YouTube trailers, recommendations, and streaming providers;
-- provides automated integration test verification via `frontend/test-runner.html` and `scripts/test_tmdb_integration.py`.
+  reached or the page limit is exhausted.
 
 The browser-visible TMDB key is public by design in the current frontend-only
 release. It must never be replaced with a Supabase secret or service-role key.
@@ -386,7 +382,7 @@ repository workflow.
 | M01 shell/design foundation | Implemented |
 | M02 public Explore | Implemented |
 | M03 global search | Implemented |
-| M04 media details | Implemented (TMDB endpoints & UI) |
+| M04 media details | Planned |
 | M05 authentication | Planned |
 | Collections/favorites/watchlist | Planned |
 | Ratings/reviews/social features | Planned |
