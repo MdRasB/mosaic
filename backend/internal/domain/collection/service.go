@@ -53,21 +53,18 @@ func (s *Service) Add(ctx context.Context, userID string, input MediaInput, favo
 	var itemID int64
 	var created bool
 	err = tx.QueryRow(ctx, `INSERT INTO user_media
-		(user_id, media_id, is_favorite, favorited_at)
-		VALUES ($1, $2, $3, CASE WHEN $3 THEN now() ELSE NULL END)
-		ON CONFLICT (user_id, media_id) DO UPDATE SET updated_at = user_media.updated_at
+		(user_id, media_id, in_collection, is_favorite, favorited_at)
+		VALUES ($1, $2, NOT $3, $3, CASE WHEN $3 THEN now() ELSE NULL END)
+		ON CONFLICT (user_id, media_id) DO UPDATE SET
+			in_collection = user_media.in_collection OR NOT $3,
+			is_favorite = user_media.is_favorite OR $3,
+			favorited_at = CASE WHEN user_media.is_favorite OR $3
+				THEN COALESCE(user_media.favorited_at, now()) ELSE NULL END,
+			updated_at = now()
 		RETURNING id, (xmax = 0)`,
 		userID, mediaID, favorite).Scan(&itemID, &created)
 	if err != nil {
 		return Item{}, false, fmt.Errorf("upsert collection item: %w", err)
-	}
-	if favorite {
-		_, err = tx.Exec(ctx, `UPDATE user_media
-			SET is_favorite = TRUE, favorited_at = COALESCE(favorited_at, now()), updated_at = now()
-			WHERE id = $1 AND user_id = $2`, itemID, userID)
-		if err != nil {
-			return Item{}, false, fmt.Errorf("favorite collection item: %w", err)
-		}
 	}
 	if err := tx.Commit(ctx); err != nil {
 		return Item{}, false, fmt.Errorf("commit collection transaction: %w", err)
@@ -107,9 +104,18 @@ func (s *Service) Find(ctx context.Context, userID string, input MediaInput) (It
 }
 
 func (s *Service) Remove(ctx context.Context, userID string, itemID int64) error {
-	result, err := s.db.Exec(ctx, `DELETE FROM user_media WHERE id = $1 AND user_id = $2`, itemID, userID)
+	result, err := s.db.Exec(ctx, `DELETE FROM user_media
+		WHERE id = $1 AND user_id = $2 AND in_collection = TRUE AND is_favorite = FALSE`, itemID, userID)
 	if err != nil {
 		return fmt.Errorf("remove collection item: %w", err)
+	}
+	if result.RowsAffected() > 0 {
+		return nil
+	}
+	result, err = s.db.Exec(ctx, `UPDATE user_media SET in_collection = FALSE, updated_at = now()
+		WHERE id = $1 AND user_id = $2 AND in_collection = TRUE AND is_favorite = TRUE`, itemID, userID)
+	if err != nil {
+		return fmt.Errorf("remove collection membership: %w", err)
 	}
 	if result.RowsAffected() == 0 {
 		return ErrNotFound
@@ -142,6 +148,8 @@ func (s *Service) List(ctx context.Context, userID string, filters Filters, favo
 	}
 	if favorites {
 		where += " AND um.is_favorite = TRUE"
+	} else {
+		where += " AND um.in_collection = TRUE"
 	}
 	result := ListResult{Items: make([]Item, 0)}
 	countQuery := "SELECT count(*) FROM user_media um JOIN media_items mi ON mi.id = um.media_id WHERE " + where
@@ -181,13 +189,13 @@ func (s *Service) List(ctx context.Context, userID string, filters Filters, favo
 }
 
 const itemQuery = `SELECT um.id, mi.provider, mi.media_type, mi.provider_media_id,
-	mi.title, mi.poster_path, mi.release_date::text, um.is_favorite, um.status,
+	mi.title, mi.poster_path, mi.release_date::text, um.in_collection, um.is_favorite, um.status,
 	um.created_at, um.updated_at, um.favorited_at FROM user_media um
 	JOIN media_items mi ON mi.id = um.media_id`
 
 func scanArgs(item *Item) []any {
 	return []any{&item.ID, &item.Media.Provider, &item.Media.MediaType, &item.Media.ProviderMediaID,
-		&item.Media.Title, &item.Media.PosterPath, &item.Media.ReleaseDate,
+		&item.Media.Title, &item.Media.PosterPath, &item.Media.ReleaseDate, &item.InCollection,
 		&item.IsFavorite, &item.Status, &item.CreatedAt, &item.UpdatedAt, &item.FavoritedAt}
 }
 
