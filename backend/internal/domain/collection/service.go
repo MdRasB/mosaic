@@ -143,7 +143,7 @@ func (s *Service) List(ctx context.Context, userID string, filters Filters, favo
 	if favorites {
 		where += " AND um.is_favorite = TRUE"
 	}
-	var result ListResult
+	result := ListResult{Items: make([]Item, 0)}
 	countQuery := "SELECT count(*) FROM user_media um JOIN media_items mi ON mi.id = um.media_id WHERE " + where
 	if err := s.db.QueryRow(ctx, countQuery, args...).Scan(&result.Pagination.Total); err != nil {
 		return result, fmt.Errorf("count collection: %w", err)

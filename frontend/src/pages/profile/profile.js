@@ -15,7 +15,10 @@ function profileMarkup(profile) {
           <h1 id="profile-title">Profile</h1>
           <p class="muted">Your identity in the Mosaic community.</p>
         </div>
-        <a class="button button-primary" href="/settings/profile">Edit profile</a>
+        <div class="profile-heading-actions">
+          <a class="button button-primary" href="/settings/profile">Edit profile</a>
+          <button class="button button-ghost" type="button" data-profile-logout>Log out</button>
+        </div>
       </div>
       <article class="profile-card">
         <div class="profile-identity">
@@ -36,7 +39,7 @@ function profileMarkup(profile) {
     </section>`;
 }
 
-export async function renderProfilePage(container) {
+export async function renderProfilePage(container, onLogout) {
   container.classList.remove("explore-shell");
   container.innerHTML = `<section class="profile-state" aria-live="polite"><p>Loading profile...</p></section>`;
   try {
@@ -57,6 +60,7 @@ export async function renderProfilePage(container) {
         note.hidden = false;
       }
     });
+    container.querySelector("[data-profile-logout]").addEventListener("click", onLogout);
   } catch (error) {
     container.innerHTML = `
       <section class="profile-state" role="alert">
@@ -64,6 +68,6 @@ export async function renderProfilePage(container) {
         <p class="muted">${escapeHtml(error.message)}</p>
         <button class="button button-primary" type="button" data-profile-retry>Try again</button>
       </section>`;
-    container.querySelector("[data-profile-retry]").addEventListener("click", () => renderProfilePage(container));
+    container.querySelector("[data-profile-retry]").addEventListener("click", () => renderProfilePage(container, onLogout));
   }
 }
