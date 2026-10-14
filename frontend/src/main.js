@@ -4,7 +4,7 @@ import { renderSearchLanding, renderSearchPage } from "./pages/search/search.js"
 import { parseMediaRoute, renderMediaDetailsPage } from "./pages/media/media-details.js";
 import { authService } from "./auth/auth-service.js";
 import { profileService } from "./profile/profile-service.js";
-import { avatarInitials, renderAvatar } from "./profile/avatar.js";
+import { avatarInitials, avatarSource, renderAvatar } from "./profile/avatar.js";
 import { renderAuthPage, renderDashboard } from "./pages/auth/auth.js";
 import { renderProfilePage } from "./pages/profile/profile.js";
 import { renderProfileSettings } from "./pages/profile/profile-settings.js";
@@ -99,7 +99,7 @@ function updateAuthControls() {
   loginButton.hidden = Boolean(currentUser);
   registerButton.hidden = Boolean(currentUser);
   profileButton.hidden = !currentUser;
-  renderAvatar(profileButton, currentProfile?.avatar_url, {
+  renderAvatar(profileButton, avatarSource(currentProfile), {
     imageClass: "avatar-button-image",
     initials: topbarInitials()
   });
