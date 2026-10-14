@@ -116,7 +116,7 @@ func normalizeAndValidate(input UpdateInput) (UpdateInput, error) {
 	if input.AvatarURL != nil {
 		parsed, err := url.Parse(*input.AvatarURL)
 		if err != nil || parsed.Scheme != "https" || parsed.Host == "" {
-			return UpdateInput{}, fmt.Errorf("%w: avatar URL must be a valid HTTPS URL", ErrInvalidInput)
+			return UpdateInput{}, fmt.Errorf("%w: avatar URL must be a direct HTTPS image link (copy the image address, not a search page)", ErrInvalidInput)
 		}
 	}
 	if input.Visibility != "private" && input.Visibility != "public" {
