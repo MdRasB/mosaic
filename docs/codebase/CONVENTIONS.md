@@ -1,52 +1,41 @@
 # Coding Conventions
 
-## Core Sections (Required)
+## Naming and organization
 
-### 1) Naming Rules
+- JavaScript/CSS files use lowercase kebab-case or established names such as
+  `media-details.js` and `main.css`.
+- JavaScript functions and variables use camelCase.
+- Go packages and files follow standard lowercase Go naming.
+- Frontend imports are explicit relative imports; no aliases or barrel files
+  are configured.
 
-| Item | Rule | Example | Evidence |
-|---|---|---|---|
-| Files | [TODO] Planned lowercase JavaScript and Go filenames. | `router.js`, `main.go` | `Mosaic_Project_Complete_Plan_Final.md:1989-2077` |
-| Functions/methods | camelCase | `themeToggle.addEventListener(...)` | `frontend/src/main.js` |
-| Types/interfaces | Not applicable in current JavaScript frontend | [TODO] | `frontend/src/main.js` |
-| Constants/env vars | Environment variables use the `VITE_` prefix for V1 browser configuration. | `VITE_TMDB_API_KEY` | `Mosaic_Project_Complete_Plan_Final.md:2194-2216` |
+Evidence: `frontend/src/main.js`, `frontend/src/pages/media/media-details.js`,
+`backend/internal/config/config.go`.
 
-### 2) Formatting and Linting
+## Formatting and checks
 
-- Formatter: No formatter configured; preserve the existing two-space
-  JavaScript/CSS style and run `gofmt` for Go files.
-- Linter: No project linter configured.
-- Most relevant enforced rules: `npm run build`, `git diff --check`, and
-  `gofmt`/`go test ./...` for backend changes.
-- Run commands: `cd frontend && npm run build`; `cd backend && go test ./...`.
+No formatter or linter is configured. Existing JavaScript and CSS use two-space
+indentation. Go changes should be formatted with `gofmt`. `git diff --check`,
+`npm run build`, and `go test ./...` are the available checks.
 
-### 3) Import and Module Conventions
+## Error handling
 
-- Import grouping/order: explicit relative imports at the top of each module.
-- Alias vs relative import policy: relative paths; no alias configuration.
-- Public exports/barrel policy: modules export named functions directly; no
-  barrel files are currently used.
+Frontend pages render explicit loading/error/empty states and log contextual
+failures with `console.error`. The TMDB client removes failed requests from
+its cache so retry can make a fresh request. Go handlers return HTTP errors;
+startup and shutdown failures are logged by `main.go`.
 
-### 4) Error and Logging Conventions
+## Security conventions
 
-- Error strategy by layer: frontend pages render explicit loading, empty,
-  API-failure, and retry states; backend handlers return HTTP errors and log
-  startup failures.
-- Logging style and required context fields: contextual `console.error` in
-  frontend failures and standard Go `log` for the current API foundation.
-- Sensitive-data redaction rules: Supabase secret/service-role keys must remain server-side.
+API-provided strings rendered into HTML pass through `escapeHtml()`. New-tab
+external links use `rel="noopener noreferrer"`. Browser configuration is
+public; database and future auth secrets must remain backend-only.
 
-### 5) Testing Conventions
+## Evidence
 
-- Test file naming/location rule: Go tests use `_test.go` beside the package;
-  frontend tests are not configured.
-- Mocking strategy norm: use `httptest` for HTTP boundaries and avoid external
-  services in tests.
-- Coverage expectation: no threshold currently configured.
-
-### 6) Evidence
-
-- `Mosaic_Project_Complete_Plan_Final.md:2272-2319`
-- `Mosaic_Project_Complete_Plan_Final.md:2194-2224`
-- `frontend/src/main.js`
-- `frontend/src/styles/*.css`
+- `frontend/src/utils/escape-html.js`
+- `frontend/src/api/tmdb.js`
+- `frontend/src/pages/explore/explore.js`
+- `frontend/src/pages/media/media-details.js`
+- `backend/cmd/api/main.go`
+- `.gitignore`

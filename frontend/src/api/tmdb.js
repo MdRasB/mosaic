@@ -10,6 +10,7 @@ const DEFAULT_TIMEOUT_MS = 10000;
 const TARGET_ROW_SIZE = 20;
 const MAX_PAGES_PER_SECTION = 5;
 const SUGGESTION_LIMIT = 8;
+const MEDIA_TYPES = new Set(["movie", "tv"]);
 
 const responseCache = new Map();
 const restrictedContentPattern = /\b(?:adult|bondage|erotic|xxx|porn(?:ographic)?|sex(?:ual)?|nude|nudity|intercourse|fetish|lust)\b/i;
@@ -196,11 +197,18 @@ export function normalizeMedia(item, type) {
     id: item.id,
     type: resolvedType,
     title: item.title ?? item.name ?? "Untitled",
+    overview,
+    description: overview,
     posterPath: item.poster_path,
+    posterUrl: imageUrl(item.poster_path, "w342"),
     backdropPath: item.backdrop_path,
+    backdropUrl: imageUrl(item.backdrop_path, "w1280"),
     releaseDate: item.release_date ?? item.first_air_date ?? "",
     rating: Number(item.vote_average ?? 0),
-    overview: item.overview ?? ""
+    voteCount: Number(item.vote_count ?? 0),
+    language: item.original_language ?? "",
+    genreIds: item.genre_ids ?? [],
+    source: "tmdb"
   };
 }
 

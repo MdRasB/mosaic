@@ -95,3 +95,71 @@
   color: var(--color-muted);
   font-size: 0.75rem;
 }
+
+.search-suggestions-header {
+  align-items: center;
+  color: var(--color-muted);
+  display: flex;
+  font-size: 0.72rem;
+  font-weight: 800;
+  justify-content: space-between;
+  letter-spacing: 0.04em;
+  padding: var(--space-1) var(--space-2) var(--space-2);
+  text-transform: uppercase;
+}
+
+.search-suggestions-clear {
+  background: transparent;
+  border: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 150ms ease;
+}
+
+.search-suggestions-clear:hover {
+  color: var(--color-danger);
+}
+
+.search-suggestion-recent {
+  justify-content: space-between;
+}
+
+.search-suggestion-recent-icon {
+  align-items: center;
+  color: var(--color-muted);
+  display: flex;
+  font-size: 0.95rem;
+  height: 2.25rem;
+  justify-content: center;
+  width: 2.25rem;
+}
+
+.search-suggestion-recent .search-suggestion-text {
+  flex: 1;
+}
+
+.search-suggestion-remove {
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  cursor: pointer;
+  display: flex;
+  font-size: 1.1rem;
+  height: 1.75rem;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  transition: color 150ms ease, background-color 150ms ease;
+  width: 1.75rem;
+}
+
+.search-suggestion-remove:hover {
+  background: color-mix(in srgb, var(--color-danger) 20%, transparent);
+  color: var(--color-danger);
+}

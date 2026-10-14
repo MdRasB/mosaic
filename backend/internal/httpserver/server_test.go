@@ -9,7 +9,7 @@ import (
 )
 
 func TestHealthEndpoint(t *testing.T) {
-	server := New(config.Config{AllowedOrigin: "http://localhost:5173"})
+	server := New(config.Config{AllowedOrigin: "http://localhost:5173"}, nil)
 	request := httptest.NewRequest(http.MethodGet, "/health", nil)
 	response := httptest.NewRecorder()
 
@@ -25,7 +25,7 @@ func TestHealthEndpoint(t *testing.T) {
 }
 
 func TestHealthEndpointRejectsNonGetRequests(t *testing.T) {
-	server := New(config.Config{AllowedOrigin: "http://localhost:5173"})
+	server := New(config.Config{AllowedOrigin: "http://localhost:5173"}, nil)
 	request := httptest.NewRequest(http.MethodPost, "/health", nil)
 	response := httptest.NewRecorder()
 

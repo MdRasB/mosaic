@@ -17,6 +17,7 @@ const themeStorageKey = "mosaic-theme";
 const content = document.querySelector("#app-content");
 const searchForm = document.querySelector("#global-search-form");
 const searchInput = document.querySelector("#global-search");
+let currentUser = null;
 
 function setTheme(isLight, { persist = true } = {}) {
   document.documentElement.toggleAttribute("data-theme", isLight);
@@ -81,23 +82,103 @@ function isCurrentNavigationTarget(link) {
   );
 }
 
+function updateAuthControls() {
+  loginButton.hidden = Boolean(currentUser);
+  registerButton.hidden = Boolean(currentUser);
+  profileButton.hidden = !currentUser;
+  profileButton.textContent = currentUser ? currentUser.email.slice(0, 2).toUpperCase() : "MR";
+  profileButton.setAttribute("aria-label", currentUser ? `Open account for ${currentUser.email}` : "Open profile");
+}
+
+function updateNavigationState() {
+  const currentPath = window.location.pathname;
+  navLinks.forEach((link) => {
+    if (link.classList.contains("nav-link-disabled")) return;
+    const targetPath = new URL(link.href, window.location.origin).pathname;
+    const isExplore = (currentPath === "/" || currentPath === "/explore")
+      && (targetPath === "/" || targetPath === "/explore");
+    const isActive = isExplore || targetPath === currentPath;
+    link.classList.toggle("is-active", isActive);
+    if (isActive) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+function safeRedirectPath(path) {
+  return path.startsWith("/") && !path.startsWith("//")
+    ? path
+    : "/dashboard";
+}
+
+async function loadSession() {
+  try {
+    currentUser = await authService.me();
+  } catch {
+    currentUser = null;
+  }
+  updateAuthControls();
+}
+
 function renderRoute() {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
+  content.mediaDetailsRenderToken = Symbol("route-change");
+  updateNavigationState();
 
-  if (path === "/" || path === "/explore") {
+  if (path === "/login" || path === "/register") {
+    if (currentUser) {
+      window.history.replaceState({}, "", "/dashboard");
+      loadSession().then(renderRoute);
+      return;
+    }
+    renderAuthPage(content, path.slice(1), () => {
+      const destination = new URLSearchParams(window.location.search).get("redirect");
+      const safeDestination = safeRedirectPath(destination ?? "/dashboard");
+      window.history.pushState({}, "", safeDestination);
+      loadSession().then(renderRoute);
+    });
+  } else if (path === "/profile" || path === "/settings/profile") {
+    if (!currentUser) {
+      window.history.replaceState({}, "", `/login?redirect=${encodeURIComponent(path)}`);
+      loadSession().then(renderRoute);
+      return;
+    }
+    if (path === "/profile") {
+      renderProfilePage(content);
+    } else {
+      renderProfileSettings(content);
+    }
+  } else if (path === "/dashboard") {
+    if (!currentUser) {
+      window.history.replaceState({}, "", `/login?redirect=${encodeURIComponent(path)}`);
+      renderRoute();
+      return;
+    }
+    renderDashboard(content, currentUser, async () => {
+      await authService.logout();
+      currentUser = null;
+      updateAuthControls();
+      window.history.pushState({}, "", "/explore");
+      renderRoute();
+    });
+  } else if (path === "/" || path === "/explore") {
     renderExplorePage(content);
   } else if (path === "/search") {
     const query = params.get("q")?.trim();
 
+    searchSuggestions.close();
+
     if (!query) {
-      renderPlaceholder("Search for a movie or TV show.");
+      searchInput.value = "";
+      renderSearchLanding(content);
       return;
     }
 
-    searchSuggestions.close();
     searchInput.value = query;
-    renderSearchPage(content, query, params.get("type"));
+    renderSearchPage(content, query, params.get("type"), params.get("sort"));
   } else if (path.startsWith("/media/")) {
     const segments = path.split("/").filter(Boolean);
     const mediaType = segments[1] || "movie";
@@ -136,14 +217,20 @@ sidebarOverlay.addEventListener("click", () => {
   sidebarToggle.setAttribute("aria-label", "Open sidebar");
 });
 
-// M05 authentication is not implemented yet; these controls document the planned public header.
 loginButton.addEventListener("click", () => {
   window.location.href = "/login";
 });
 registerButton.addEventListener("click", () => {
   window.location.href = "/register";
 });
-profileButton.addEventListener("click", () => showMessage("Profile will be available in Module M06."));
+profileButton.addEventListener("click", () => {
+  if (currentUser) {
+    window.history.pushState({}, "", "/profile");
+    renderRoute();
+  } else {
+    showMessage("Sign in to open your profile.");
+  }
+});
 
 navLinks.forEach((link) => {
   link.addEventListener("click", (event) => {
@@ -155,6 +242,9 @@ navLinks.forEach((link) => {
     }
 
     if (!link.classList.contains("nav-link-disabled")) {
+      event.preventDefault();
+      window.history.pushState({}, "", link.href);
+      renderRoute();
       return;
     }
 
@@ -171,9 +261,10 @@ function submitSearchQuery(rawQuery) {
     return;
   }
 
+  saveRecentSearch(query);
   searchInput.value = query;
   window.history.pushState({}, "", `/search?q=${encodeURIComponent(query)}`);
-  renderRoute();
+  loadSession().then(renderRoute);
 }
 
 const searchSuggestions = createSearchSuggestions({
@@ -189,7 +280,7 @@ searchForm.addEventListener("submit", (event) => {
 
 window.addEventListener("popstate", () => {
   searchSuggestions.close();
-  renderRoute();
+  loadSession().then(renderRoute);
 });
 
 content.addEventListener("click", (event) => {
@@ -207,4 +298,4 @@ if (!window.matchMedia("(max-width: 800px)").matches) {
   setSidebarCollapsed(true);
 }
 
-renderRoute();
+loadSession().then(renderRoute);

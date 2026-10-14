@@ -12,13 +12,35 @@ import (
 
 	"github.com/MdRasB/mosaic/backend/internal/config"
 	"github.com/MdRasB/mosaic/backend/internal/httpserver"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
 	cfg := config.Load()
+	var pool *pgxpool.Pool
+	if cfg.DatabaseURL != "" {
+		poolConfig, err := pgxpool.ParseConfig(cfg.DatabaseURL)
+		if err != nil {
+			log.Fatalf("Mosaic API database setup failed: %v", err)
+		}
+		// Supabase's transaction pooler can reuse a connection for a different
+		// client session, so server-side prepared statements are not stable.
+		poolConfig.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeSimpleProtocol
+		pool, err = pgxpool.NewWithConfig(context.Background(), poolConfig)
+		if err != nil {
+			log.Fatalf("Mosaic API database setup failed: %v", err)
+		}
+		defer pool.Close()
+		if err := pool.Ping(context.Background()); err != nil {
+			log.Fatalf("Mosaic API database connection failed: %v", err)
+		}
+	} else {
+		log.Print("DATABASE_URL is not configured; authentication routes are disabled")
+	}
 	server := &http.Server{
 		Addr:              cfg.Address,
-		Handler:           httpserver.New(cfg),
+		Handler:           httpserver.New(cfg, pool),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      15 * time.Second,
