@@ -22,16 +22,17 @@ manual browser verification.
 
 ## Current coverage
 
-The health handler and method rejection are covered. Password hashing has unit
-coverage, and a local PostgreSQL smoke test covers registration, session
-restoration, and logout. There are no automated tests for TMDB requests, route
-parsing, M04 rendering, responsive layout, browser history, or full
-authentication database behavior.
+The health handler and method rejection are covered. Password hashing and
+profile/avatar content validation have unit coverage. A local PostgreSQL smoke
+test covers registration, session restoration, and logout. There are no
+automated browser tests for TMDB requests, route parsing, rendering, responsive
+layout, browser history, or multipart upload transport.
 
 ## Required next tests
 
-M04 needs route-shape, missing-metadata, not-found, retry, and stale-render
-checks. M05 still needs database integration tests for unique emails,
+The profile upload flow still needs a browser/integration test proving that the
+request is multipart and that the authenticated endpoint persists and serves
+an avatar. Auth still needs database integration tests for unique emails,
 expiry/revocation, malformed input, rate limiting, and token use. The local
 migration and endpoint flow can be exercised with `make db-migrate` and the API
 running with `DATABASE_URL` configured.
@@ -44,6 +45,8 @@ logout.
 
 - `backend/internal/auth/password_test.go`
 - `backend/internal/httpserver/server_test.go`
+- `backend/internal/profile/avatar_test.go`
+- `backend/internal/profile/service_test.go`
 - `frontend/package.json`
 - `Makefile`
 - `frontend/src/pages/media/media-details.js`

@@ -3,10 +3,9 @@
 ## Architectural style
 
 Mosaic is a Vite-served, client-routed public catalog application with a
-separate Go HTTP foundation and local PostgreSQL service. Public catalog
-requests currently go from the browser to TMDB; account data is not yet
-implemented. The intended M05 boundary is browser → Go API → PostgreSQL, with
-no direct browser database access.
+separate Go HTTP API and PostgreSQL persistence. Public catalog requests go
+from the browser to TMDB. Authentication and profile data go through the Go
+API; the browser does not access PostgreSQL or Supabase directly.
 
 ## Current flow
 
@@ -14,13 +13,14 @@ no direct browser database access.
 browser route
   -> main.js route switch
   -> page module
-  -> tmdb.js request/cache/normalization
+  -> API client
   -> normalized media renderers
 ```
 
-`getMediaDetails()` uses the same TMDB request/cache layer as Explore and
-Search. Details rendering escapes API text and uses a render token to prevent
-late responses replacing a newer route.
+TMDB pages use the TMDB request/cache layer. Authentication and profile pages
+use the credentialed API client. Profile avatar uploads use multipart
+`FormData`; the client omits `Content-Type` so the browser supplies the
+multipart boundary.
 
 ## Responsibilities
 
@@ -30,15 +30,10 @@ late responses replacing a newer route.
 | `pages/` | Page markup, page requests, page state | `frontend/src/pages/` |
 | `components/` | Reusable media/state markup | `frontend/src/components/` |
 | `api/` | TMDB request, caching, normalization | `frontend/src/api/tmdb.js` |
-| Go `httpserver` | HTTP handlers and CORS foundation | `backend/internal/httpserver/server.go` |
+| Go `httpserver` | HTTP handlers and CORS | `backend/internal/httpserver/server.go` |
+| Go `auth`/`profile` | Sessions, profile validation, avatar persistence | `backend/internal/auth`, `backend/internal/profile` |
+| Supabase PostgreSQL | Users, sessions, profiles, avatar bytes | `supabase/migrations/`, `backend/internal/profile/service.go` |
 | Compose/database | Local PostgreSQL lifecycle | `compose.yml` |
-
-## Planned M05 boundary
-
-The merged M04/M05 plan requires Go to own password hashing, session
-validation, authorization, and database access. Versioned migrations and the
-auth repository/service layers are `[TODO]`; they are not present in the
-current tree.
 
 ## Evidence
 
