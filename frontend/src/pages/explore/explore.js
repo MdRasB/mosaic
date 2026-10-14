@@ -98,7 +98,7 @@ async function loadSection(section, container, renderToken) {
       return;
     }
 
-    setSectionError(section, container, error?.message || "Could not load this section.");
+    setSectionError(section, container, "Could not load this section.");
     console.error(`Unable to load ${section.id}.`, error);
   }
 }
@@ -119,7 +119,7 @@ async function loadFeatured(container, renderToken) {
       return;
     }
 
-    featuredContainer.innerHTML = errorState(error?.message || "Could not load featured media.", "featured");
+    featuredContainer.innerHTML = errorState("Could not load featured media.", "featured");
     console.error("Unable to load featured media.", error);
   }
 }
