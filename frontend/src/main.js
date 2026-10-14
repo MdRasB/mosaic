@@ -1,12 +1,7 @@
 import { createSearchSuggestions } from "./components/search/search-suggestions.js";
 import { renderExplorePage } from "./pages/explore/explore.js";
-import { renderSearchLanding, renderSearchPage } from "./pages/search/search.js";
-import { parseMediaRoute, renderMediaDetailsPage } from "./pages/media/media-details.js";
-import { authService } from "./auth/auth-service.js";
-import { renderAuthPage, renderDashboard } from "./pages/auth/auth.js";
-import { renderProfilePage } from "./pages/profile/profile.js";
-import { renderProfileSettings } from "./pages/profile/profile-settings.js";
-import { saveRecentSearch } from "./utils/recent-searches.js";
+import { renderSearchPage } from "./pages/search/search.js";
+import { renderMediaPage } from "./pages/media/media.js";
 
 const themeToggle = document.querySelector("#theme-toggle");
 const appShell = document.querySelector(".app-shell");
@@ -185,18 +180,15 @@ function renderRoute() {
     searchInput.value = query;
     renderSearchPage(content, query, params.get("type"), params.get("sort"));
   } else if (path.startsWith("/media/")) {
-    const mediaRoute = parseMediaRoute(path);
-    if (!mediaRoute) {
-      content.classList.remove("explore-shell");
-      content.innerHTML = `
-        <section class="explore-state explore-state-empty page-placeholder">
-          <div><p class="eyebrow">Invalid media link</p><h1>That title link is not valid.</h1>
-          <p class="muted">Choose a movie or TV show from Explore or Search.</p></div>
-          <a class="button button-primary" href="/explore">Back to Explore</a>
-        </section>`;
-      return;
+    const segments = path.split("/").filter(Boolean);
+    const mediaType = segments[1] || "movie";
+    const mediaId = segments[2];
+
+    if (mediaId) {
+      renderMediaPage(content, mediaType, mediaId);
+    } else {
+      renderPlaceholder("Media ID was not specified.");
     }
-    renderMediaDetailsPage(content, mediaRoute);
   } else {
     renderPlaceholder("This page is not available yet.");
   }
@@ -289,6 +281,16 @@ searchForm.addEventListener("submit", (event) => {
 window.addEventListener("popstate", () => {
   searchSuggestions.close();
   loadSession().then(renderRoute);
+});
+
+content.addEventListener("click", (event) => {
+  const mediaLink = event.target.closest("a[data-media-card], a[href^='/media/']");
+  if (mediaLink) {
+    event.preventDefault();
+    const href = mediaLink.getAttribute("href");
+    window.history.pushState({}, "", href);
+    renderRoute();
+  }
 });
 
 restoreTheme();
