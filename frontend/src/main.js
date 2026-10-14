@@ -8,6 +8,7 @@ import { avatarInitials, avatarSource, renderAvatar } from "./profile/avatar.js"
 import { renderAuthPage, renderDashboard } from "./pages/auth/auth.js";
 import { renderProfilePage } from "./pages/profile/profile.js";
 import { renderProfileSettings } from "./pages/profile/profile-settings.js";
+import { renderCollectionPage } from "./pages/collection/collection.js";
 import { saveRecentSearch } from "./utils/recent-searches.js";
 
 const themeToggle = document.querySelector("#theme-toggle");
@@ -177,6 +178,13 @@ function renderRoute() {
     } else {
       renderProfileSettings(content);
     }
+  } else if (path === "/collection" || path === "/favorites") {
+    if (!currentUser) {
+      window.history.replaceState({}, "", `/login?redirect=${encodeURIComponent(path)}`);
+      renderRoute();
+      return;
+    }
+    renderCollectionPage(content, { favoritePage: path === "/favorites" });
   } else if (path === "/dashboard") {
     if (!currentUser) {
       window.history.replaceState({}, "", `/login?redirect=${encodeURIComponent(path)}`);
@@ -218,7 +226,7 @@ function renderRoute() {
         </section>`;
       return;
     }
-    renderMediaDetailsPage(content, mediaRoute);
+    renderMediaDetailsPage(content, mediaRoute, currentUser);
   } else {
     renderPlaceholder("This page is not available yet.");
   }

@@ -136,6 +136,13 @@ reads and updates go through the Go API (`/api/v1/profile/me`); the browser
 never connects directly to Supabase. Apply the profile migration before
 deploying a backend version that provisions profiles during registration.
 
+Authenticated collection routes are `/collection` and `/favorites`. Collection
+and favorite operations use the Go API and the shared
+`supabase/migrations/20261015120000_collection_favorites.sql` schema. Apply
+that migration before deploying the corresponding backend or frontend. A
+favorite is stored on a collection relationship; favoriting a title that is
+not yet collected atomically creates both records.
+
 During local Vite development, API requests intentionally use the relative
 `/api` proxy even if `VITE_API_BASE_URL` is present in `frontend/.env`. This
 keeps `localhost` and `127.0.0.1` browser sessions same-origin. Open the site
