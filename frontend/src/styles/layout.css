@@ -249,10 +249,21 @@ input {
   background: var(--color-secondary);
   border-radius: 50%;
   color: white;
+  display: grid;
   font-size: 0.72rem;
   font-weight: 800;
   height: 2.25rem;
+  overflow: hidden;
+  padding: 0;
+  place-items: center;
   width: 2.25rem;
+}
+
+.avatar-button-image {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
 }
 
 .icon-button {
