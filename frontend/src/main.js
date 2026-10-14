@@ -3,6 +3,8 @@ import { renderExplorePage } from "./pages/explore/explore.js";
 import { renderSearchLanding, renderSearchPage } from "./pages/search/search.js";
 import { parseMediaRoute, renderMediaDetailsPage } from "./pages/media/media-details.js";
 import { authService } from "./auth/auth-service.js";
+import { profileService } from "./profile/profile-service.js";
+import { avatarInitials, renderAvatar } from "./profile/avatar.js";
 import { renderAuthPage, renderDashboard } from "./pages/auth/auth.js";
 import { renderProfilePage } from "./pages/profile/profile.js";
 import { renderProfileSettings } from "./pages/profile/profile-settings.js";
@@ -23,6 +25,7 @@ const content = document.querySelector("#app-content");
 const searchForm = document.querySelector("#global-search-form");
 const searchInput = document.querySelector("#global-search");
 let currentUser = null;
+let currentProfile = null;
 
 function setTheme(isLight, { persist = true } = {}) {
   document.documentElement.toggleAttribute("data-theme", isLight);
@@ -87,11 +90,19 @@ function isCurrentNavigationTarget(link) {
   );
 }
 
+function topbarInitials() {
+  const fallback = currentUser?.email ? currentUser.email.slice(0, 2).toUpperCase() : "MR";
+  return avatarInitials(currentProfile, fallback);
+}
+
 function updateAuthControls() {
   loginButton.hidden = Boolean(currentUser);
   registerButton.hidden = Boolean(currentUser);
   profileButton.hidden = !currentUser;
-  profileButton.textContent = currentUser ? currentUser.email.slice(0, 2).toUpperCase() : "MR";
+  renderAvatar(profileButton, currentProfile?.avatar_url, {
+    imageClass: "avatar-button-image",
+    initials: topbarInitials()
+  });
   profileButton.setAttribute("aria-label", currentUser ? `Open account for ${currentUser.email}` : "Open profile");
 }
 
@@ -124,6 +135,16 @@ async function loadSession() {
   } catch {
     currentUser = null;
   }
+
+  currentProfile = null;
+  if (currentUser) {
+    try {
+      currentProfile = await profileService.get();
+    } catch {
+      currentProfile = null;
+    }
+  }
+
   updateAuthControls();
 }
 
@@ -165,6 +186,7 @@ function renderRoute() {
     renderDashboard(content, currentUser, async () => {
       await authService.logout();
       currentUser = null;
+      currentProfile = null;
       updateAuthControls();
       window.history.pushState({}, "", "/explore");
       renderRoute();
@@ -289,6 +311,11 @@ searchForm.addEventListener("submit", (event) => {
 window.addEventListener("popstate", () => {
   searchSuggestions.close();
   loadSession().then(renderRoute);
+});
+
+window.addEventListener("mosaic:profile-updated", (event) => {
+  currentProfile = event.detail ?? null;
+  updateAuthControls();
 });
 
 restoreTheme();

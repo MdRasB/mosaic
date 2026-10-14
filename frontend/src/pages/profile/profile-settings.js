@@ -1,5 +1,7 @@
 import { profileService } from "../../profile/profile-service.js";
 import { escapeHtml } from "../../utils/escape-html.js";
+import { debounce } from "../../utils/debounce.js";
+import { avatarInitials, describeAvatarFailure, renderAvatar } from "../../profile/avatar.js";
 
 function formMarkup(profile) {
   return `
@@ -25,8 +27,10 @@ function formMarkup(profile) {
           <span class="field-help"><span data-bio-count>${profile.bio.length}</span>/300 characters</span>
         </label>
         <label>Avatar URL <span class="muted">(optional)</span>
+          <span class="profile-avatar profile-avatar-preview" data-avatar-preview></span>
           <input name="avatar_url" type="url" placeholder="https://..." value="${escapeHtml(profile.avatar_url ?? "")}">
-          <span class="field-help">Use an HTTPS image URL. File uploads arrive in a later module.</span>
+          <span class="field-help">Paste a direct HTTPS image link. Right-click the image and choose "Copy image address" — a Google Images search page URL will not load. File uploads arrive in a later module.</span>
+          <span class="field-help field-help-error" data-avatar-error role="alert" hidden></span>
         </label>
         <label>Profile visibility
           <select name="visibility">
@@ -51,6 +55,29 @@ export async function renderProfileSettings(container) {
     const bio = form.elements.bio;
     const counter = form.querySelector("[data-bio-count]");
     bio.addEventListener("input", () => { counter.textContent = bio.value.length; });
+
+    const avatarField = form.elements.avatar_url;
+    const preview = form.querySelector("[data-avatar-preview]");
+    const avatarError = form.querySelector("[data-avatar-error]");
+    const initials = avatarInitials(profile);
+
+    const updatePreview = (value) => {
+      avatarError.hidden = true;
+      avatarError.textContent = "";
+      renderAvatar(preview, value.trim(), {
+        imageClass: "profile-avatar-image",
+        fallbackClass: "profile-avatar-fallback",
+        initials,
+        onError: () => {
+          avatarError.textContent = describeAvatarFailure(value);
+          avatarError.hidden = false;
+        }
+      });
+    };
+
+    updatePreview(avatarField.value);
+    avatarField.addEventListener("input", debounce(() => updatePreview(avatarField.value)));
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!form.reportValidity()) return;
@@ -60,14 +87,18 @@ export async function renderProfileSettings(container) {
       button.disabled = true;
       message.textContent = "Saving...";
       try {
-        await profileService.update({
+        const saved = await profileService.update({
           username: data.get("username"),
           display_name: data.get("display_name"),
           bio: data.get("bio"),
           avatar_url: avatarURL || null,
           visibility: data.get("visibility")
         });
-        message.textContent = "Profile saved.";
+        updatePreview(saved.avatar_url ?? "");
+        window.dispatchEvent(new CustomEvent("mosaic:profile-updated", { detail: saved }));
+        message.textContent = saved.avatar_url
+          ? "Profile saved. Avatar image updated."
+          : "Profile saved. Avatar cleared.";
       } catch (error) {
         message.textContent = error.message;
       } finally {
