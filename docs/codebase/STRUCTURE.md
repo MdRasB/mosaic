@@ -5,7 +5,7 @@
 | Path | Purpose | Evidence |
 |---|---|---|
 | `frontend/` | Vite static application and source UI | `frontend/index.html`, `frontend/src/` |
-| `backend/` | Go HTTP health-service foundation | `backend/cmd/api/main.go`, `backend/internal/` |
+| `backend/` | Go HTTP API, authentication, and profiles | `backend/cmd/api/main.go`, `backend/internal/` |
 | `database/` | PostgreSQL initialization/schema location | `compose.yml`, `database/schema/` |
 | `docs/` | Project and codebase documentation | `docs/` |
 | `Makefile` | Local development and verification shortcuts | `Makefile` |
@@ -23,7 +23,9 @@ TMDB access is centralized in `frontend/src/api/tmdb.js`.
 - `pages/explore/`: public discovery rows and featured media.
 - `pages/search/`: search landing, filters, pagination, and errors.
 - `pages/media/`: validated movie/TV detail routes and detail styles.
-- `[TODO] pages/login/`, `pages/register/`, and `pages/dashboard/` for M05.
+- `pages/auth/`: login, registration, and dashboard placeholder.
+- `pages/profile/`: profile card and editable settings, including avatar upload
+  controls.
 
 ## Backend entry points
 
