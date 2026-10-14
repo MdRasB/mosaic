@@ -102,10 +102,14 @@ function updateAuthControls() {
   registerButton.hidden = Boolean(currentUser);
   topbarLogoutButton.hidden = !currentUser;
   profileButton.hidden = !currentUser;
-  renderAvatar(profileButton, avatarSource(currentProfile), {
-    imageClass: "avatar-button-image",
-    initials: topbarInitials()
-  });
+  if (currentUser) {
+    renderAvatar(profileButton, avatarSource(currentProfile), {
+      imageClass: "avatar-button-image",
+      initials: topbarInitials()
+    });
+  } else {
+    profileButton.replaceChildren();
+  }
   profileButton.setAttribute("aria-label", currentUser ? `Open account for ${currentUser.email}` : "Open profile");
 }
 
