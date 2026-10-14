@@ -28,6 +28,10 @@ test covers registration, session restoration, and logout. There are no
 automated browser tests for TMDB requests, route parsing, rendering, responsive
 layout, browser history, or multipart upload transport.
 
+Collection media identity and filter validation have unit coverage. The
+collection/favorite database transaction and browser pages still require
+integration/manual smoke tests.
+
 ## Required next tests
 
 The profile upload flow still needs a browser/integration test proving that the
@@ -47,6 +51,7 @@ logout.
 - `backend/internal/httpserver/server_test.go`
 - `backend/internal/profile/avatar_test.go`
 - `backend/internal/profile/service_test.go`
+- `backend/internal/domain/collection/service_test.go`
 - `frontend/package.json`
 - `Makefile`
 - `frontend/src/pages/media/media-details.js`
