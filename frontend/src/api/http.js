@@ -8,9 +8,15 @@ export function apiPath(path) {
 }
 
 export async function requestJSON(path, options = {}) {
+  const headers = new Headers(options.headers);
+  if (options.body instanceof FormData) {
+    headers.delete("Content-Type");
+  } else if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
   const response = await fetch(`${API_PREFIX}${path}`, {
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...(options.headers ?? {}) },
+    headers,
     ...options
   });
   if (response.status === 204) return null;
