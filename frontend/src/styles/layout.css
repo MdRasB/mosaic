@@ -259,6 +259,10 @@ input {
   width: 2.25rem;
 }
 
+.avatar-button[hidden] {
+  display: none;
+}
+
 .avatar-button-image {
   display: block;
   height: 100%;
