@@ -19,6 +19,7 @@ const sidebarToggle = document.querySelector("#sidebar-toggle");
 const sidebarOverlay = document.querySelector("#sidebar-overlay");
 const loginButton = document.querySelector("#login-button");
 const registerButton = document.querySelector("#register-button");
+const topbarLogoutButton = document.querySelector("#topbar-logout-button");
 const profileButton = document.querySelector("#profile-button");
 const navLinks = document.querySelectorAll(".nav-link");
 const themeStorageKey = "mosaic-theme";
@@ -99,12 +100,29 @@ function topbarInitials() {
 function updateAuthControls() {
   loginButton.hidden = Boolean(currentUser);
   registerButton.hidden = Boolean(currentUser);
+  topbarLogoutButton.hidden = !currentUser;
   profileButton.hidden = !currentUser;
   renderAvatar(profileButton, avatarSource(currentProfile), {
     imageClass: "avatar-button-image",
     initials: topbarInitials()
   });
   profileButton.setAttribute("aria-label", currentUser ? `Open account for ${currentUser.email}` : "Open profile");
+}
+
+async function logout() {
+  topbarLogoutButton.disabled = true;
+  try {
+    await authService.logout();
+    currentUser = null;
+    currentProfile = null;
+    updateAuthControls();
+    window.history.pushState({}, "", "/explore");
+    renderRoute();
+  } catch (error) {
+    showMessage(error.message);
+  } finally {
+    topbarLogoutButton.disabled = false;
+  }
 }
 
 function updateNavigationState() {
@@ -174,7 +192,7 @@ function renderRoute() {
       return;
     }
     if (path === "/profile") {
-      renderProfilePage(content);
+      renderProfilePage(content, logout);
     } else {
       renderProfileSettings(content);
     }
@@ -192,12 +210,7 @@ function renderRoute() {
       return;
     }
     renderDashboard(content, currentUser, async () => {
-      await authService.logout();
-      currentUser = null;
-      currentProfile = null;
-      updateAuthControls();
-      window.history.pushState({}, "", "/explore");
-      renderRoute();
+      await logout();
     });
   } else if (path === "/" || path === "/explore") {
     renderExplorePage(content);
@@ -261,6 +274,7 @@ loginButton.addEventListener("click", () => {
 registerButton.addEventListener("click", () => {
   window.location.href = "/register";
 });
+topbarLogoutButton.addEventListener("click", logout);
 profileButton.addEventListener("click", () => {
   if (currentUser) {
     window.history.pushState({}, "", "/profile");

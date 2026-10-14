@@ -13,6 +13,13 @@
   justify-content: space-between;
 }
 
+.profile-heading-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
 .profile-card, .profile-form {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -181,5 +188,9 @@
   .profile-heading {
     align-items: start;
     flex-direction: column;
+  }
+
+  .profile-heading-actions {
+    width: 100%;
   }
 }
