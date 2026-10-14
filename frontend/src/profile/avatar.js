@@ -1,3 +1,5 @@
+import { apiPath } from "../api/http.js";
+
 export function avatarInitials(profile, fallback = "MR") {
   const source = (profile?.display_name || profile?.username || "").trim();
   if (!source) return fallback;
@@ -37,6 +39,17 @@ export function renderAvatar(container, url, options = {}) {
   }, { once: true });
   image.src = url;
   container.append(image);
+}
+
+// avatarSource resolves which image to render. An uploaded image wins over a
+// pasted URL, and the cache key changes with updated_at so a replaced avatar
+// is never served from the browser cache.
+export function avatarSource(profile) {
+  if (profile?.has_uploaded_avatar) {
+    const stamp = profile.updated_at ? `?v=${encodeURIComponent(profile.updated_at)}` : "";
+    return apiPath(`/profile/me/avatar${stamp}`);
+  }
+  return profile?.avatar_url ?? "";
 }
 
 export function describeAvatarFailure(value) {

@@ -1,6 +1,6 @@
 import { profileService } from "../../profile/profile-service.js";
 import { escapeHtml } from "../../utils/escape-html.js";
-import { avatarInitials, describeAvatarFailure, renderAvatar } from "../../profile/avatar.js";
+import { avatarInitials, avatarSource, describeAvatarFailure, renderAvatar } from "../../profile/avatar.js";
 
 function profileMarkup(profile) {
   const joined = new Date(profile.created_at).toLocaleDateString(undefined, {
@@ -44,12 +44,16 @@ export async function renderProfilePage(container) {
     container.innerHTML = profileMarkup(profile);
 
     const note = container.querySelector("[data-avatar-note]");
-    renderAvatar(container.querySelector("[data-profile-avatar]"), profile.avatar_url, {
+    renderAvatar(container.querySelector("[data-profile-avatar]"), avatarSource(profile), {
       imageClass: "profile-avatar-image",
       fallbackClass: "profile-avatar-fallback",
       initials: avatarInitials(profile),
+      // An uploaded image comes from our own API, so a load failure there is a
+      // different problem than a bad pasted URL and needs its own wording.
       onError: () => {
-        note.textContent = describeAvatarFailure(profile.avatar_url);
+        note.textContent = profile.has_uploaded_avatar
+          ? "Your uploaded avatar could not be loaded. Try uploading it again."
+          : describeAvatarFailure(profile.avatar_url);
         note.hidden = false;
       }
     });

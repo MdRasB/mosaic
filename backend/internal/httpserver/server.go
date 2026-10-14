@@ -22,6 +22,8 @@ func New(cfg config.Config, pool *pgxpool.Pool) http.Handler {
 		mux.HandleFunc("/api/v1/auth/me", authHandler.Me)
 		mux.HandleFunc("/api/v1/auth/logout", authHandler.Logout)
 		mux.HandleFunc("/api/v1/profile/me", profileHandler.Me)
+		mux.HandleFunc("/api/v1/profile/me/avatar", profileHandler.AvatarImage)
+		mux.HandleFunc("/api/v1/profile/me/avatar/upload", profileHandler.UploadAvatar)
 	}
 
 	return withCORS(cfg.AllowedOrigin, mux)
@@ -46,7 +48,7 @@ func withCORS(allowedOrigin string, next http.Handler) http.Handler {
 			}
 		}
 		writer.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
-		writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
+		writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
 		writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		writer.Header().Set("Vary", "Origin")
