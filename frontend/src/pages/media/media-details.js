@@ -148,8 +148,10 @@ export async function renderMediaDetailsPage(container, route, currentUser = nul
       const result = await collectionService.check(collectionInput(media));
       const item = result.item;
       if (item) {
-        addButton.textContent = "In Collection";
-        addButton.disabled = true;
+        if (item.in_collection) {
+          addButton.textContent = "In Collection";
+          addButton.disabled = true;
+        }
         favoriteButton.textContent = item.is_favorite ? "Remove from Favorites" : "Add to Favorites";
         favoriteButton.dataset.collectionId = item.id;
         favoriteButton.dataset.favorite = String(item.is_favorite);
@@ -180,8 +182,6 @@ export async function renderMediaDetailsPage(container, route, currentUser = nul
         favoriteButton.dataset.collectionId = item.id;
         favoriteButton.dataset.favorite = String(item.is_favorite);
         favoriteButton.textContent = item.is_favorite ? "Remove from Favorites" : "Add to Favorites";
-        addButton.textContent = "In Collection";
-        addButton.disabled = true;
         status.textContent = item.is_favorite ? "Added to favorites." : "Removed from favorites.";
       } catch (error) {
         status.textContent = error.message;
