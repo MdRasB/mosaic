@@ -28,9 +28,10 @@ test covers registration, session restoration, and logout. There are no
 automated browser tests for TMDB requests, route parsing, rendering, responsive
 layout, browser history, or multipart upload transport.
 
-Collection media identity and filter validation have unit coverage. The
-collection/favorite database transaction and browser pages still require
-integration/manual smoke tests.
+Collection media identity and filter validation have unit coverage. Watchlist
+status validation and its filter parsing have unit coverage
+(`watchlist_test.go`). The collection/favorite/watchlist database
+transactions and browser pages still require integration/manual smoke tests.
 
 ## Required next tests
 
@@ -52,7 +53,8 @@ logout.
 - `backend/internal/profile/avatar_test.go`
 - `backend/internal/profile/service_test.go`
 - `backend/internal/domain/collection/service_test.go`
+- `backend/internal/domain/collection/watchlist_test.go`
 - `frontend/package.json`
 - `Makefile`
 - `frontend/src/pages/media/media-details.js`
-- `docs/M04-M05-MERGED-PLAN.md`
+- `frontend/src/pages/watchlist/watchlist.js`
