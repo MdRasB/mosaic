@@ -10,5 +10,6 @@
 @import url("../pages/auth/auth.css");
 @import url("../pages/profile/profile.css");
 @import url("../pages/collection/collection.css");
+@import url("../pages/watchlist/watchlist.css");
 @import url("../components/search/search-suggestions.css");
 @import url("./responsive.css");

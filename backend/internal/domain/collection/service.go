@@ -36,16 +36,7 @@ func (s *Service) Add(ctx context.Context, userID string, input MediaInput, favo
 	}
 	defer tx.Rollback(ctx)
 
-	var mediaID int64
-	err = tx.QueryRow(ctx, `INSERT INTO media_items
-		(provider, media_type, provider_media_id, title, poster_path, release_date, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, now())
-		ON CONFLICT (provider, media_type, provider_media_id)
-		DO UPDATE SET title = EXCLUDED.title, poster_path = EXCLUDED.poster_path,
-		              release_date = EXCLUDED.release_date, updated_at = now()
-		RETURNING id`,
-		input.Provider, input.MediaType, input.ProviderMediaID, input.Title,
-		input.PosterPath, input.ReleaseDate).Scan(&mediaID)
+	mediaID, err := upsertMedia(ctx, tx, input)
 	if err != nil {
 		return Item{}, false, fmt.Errorf("upsert media: %w", err)
 	}
@@ -71,6 +62,22 @@ func (s *Service) Add(ctx context.Context, userID string, input MediaInput, favo
 	}
 	item, err := s.Get(ctx, userID, itemID)
 	return item, created, err
+}
+
+// upsertMedia stores or refreshes the shared media row for a provider title.
+// It returns the media_items primary key used by the caller's user_media row.
+func upsertMedia(ctx context.Context, tx pgx.Tx, input MediaInput) (int64, error) {
+	var mediaID int64
+	err := tx.QueryRow(ctx, `INSERT INTO media_items
+		(provider, media_type, provider_media_id, title, poster_path, release_date, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, now())
+		ON CONFLICT (provider, media_type, provider_media_id)
+		DO UPDATE SET title = EXCLUDED.title, poster_path = EXCLUDED.poster_path,
+		              release_date = EXCLUDED.release_date, updated_at = now()
+		RETURNING id`,
+		input.Provider, input.MediaType, input.ProviderMediaID, input.Title,
+		input.PosterPath, input.ReleaseDate).Scan(&mediaID)
+	return mediaID, err
 }
 
 func (s *Service) Get(ctx context.Context, userID string, itemID int64) (Item, error) {
@@ -103,22 +110,22 @@ func (s *Service) Find(ctx context.Context, userID string, input MediaInput) (It
 	return item, nil
 }
 
+// Remove takes a title out of the collection. The row is only deleted once the
+// title is in no list at all, so removing a collection entry does not drop a
+// favorite or a watchlist status recorded for the same title.
 func (s *Service) Remove(ctx context.Context, userID string, itemID int64) error {
-	result, err := s.db.Exec(ctx, `DELETE FROM user_media
-		WHERE id = $1 AND user_id = $2 AND in_collection = TRUE AND is_favorite = FALSE`, itemID, userID)
-	if err != nil {
-		return fmt.Errorf("remove collection item: %w", err)
-	}
-	if result.RowsAffected() > 0 {
-		return nil
-	}
-	result, err = s.db.Exec(ctx, `UPDATE user_media SET in_collection = FALSE, updated_at = now()
-		WHERE id = $1 AND user_id = $2 AND in_collection = TRUE AND is_favorite = TRUE`, itemID, userID)
+	result, err := s.db.Exec(ctx, `UPDATE user_media SET in_collection = FALSE, updated_at = now()
+		WHERE id = $1 AND user_id = $2 AND in_collection = TRUE`, itemID, userID)
 	if err != nil {
 		return fmt.Errorf("remove collection membership: %w", err)
 	}
 	if result.RowsAffected() == 0 {
 		return ErrNotFound
+	}
+	if _, err := s.db.Exec(ctx, `DELETE FROM user_media
+		WHERE id = $1 AND user_id = $2 AND in_collection = FALSE
+			AND is_favorite = FALSE AND status IS NULL`, itemID, userID); err != nil {
+		return fmt.Errorf("delete empty user media row: %w", err)
 	}
 	return nil
 }
@@ -138,6 +145,27 @@ func (s *Service) SetFavorite(ctx context.Context, userID string, itemID int64, 
 }
 
 func (s *Service) List(ctx context.Context, userID string, filters Filters, favorites bool) (ListResult, error) {
+	if favorites {
+		return s.list(ctx, userID, filters, scopeFavorites)
+	}
+	return s.list(ctx, userID, filters, scopeCollection)
+}
+
+// ListWatchlist returns the user's watchlisted titles. A row is on the
+// watchlist when its status is set; filters.Status narrows to one state.
+func (s *Service) ListWatchlist(ctx context.Context, userID string, filters Filters) (ListResult, error) {
+	return s.list(ctx, userID, filters, scopeWatchlist)
+}
+
+type listScope int
+
+const (
+	scopeCollection listScope = iota
+	scopeFavorites
+	scopeWatchlist
+)
+
+func (s *Service) list(ctx context.Context, userID string, filters Filters, scope listScope) (ListResult, error) {
 	where := "um.user_id = $1"
 	args := []any{userID}
 	next := 2
@@ -146,9 +174,17 @@ func (s *Service) List(ctx context.Context, userID string, filters Filters, favo
 		args = append(args, filters.Type)
 		next++
 	}
-	if favorites {
+	switch scope {
+	case scopeFavorites:
 		where += " AND um.is_favorite = TRUE"
-	} else {
+	case scopeWatchlist:
+		where += " AND um.status IS NOT NULL"
+		if filters.Status != "all" {
+			where += fmt.Sprintf(" AND um.status = $%d", next)
+			args = append(args, filters.Status)
+			next++
+		}
+	default:
 		where += " AND um.in_collection = TRUE"
 	}
 	result := ListResult{Items: make([]Item, 0)}
@@ -161,7 +197,7 @@ func (s *Service) List(ctx context.Context, userID string, filters Filters, favo
 		order = "um.created_at ASC, um.id ASC"
 	} else if filters.Sort == "title" {
 		order = "mi.title ASC, um.id ASC"
-	} else if favorites {
+	} else if scope == scopeFavorites {
 		order = "um.favorited_at DESC, um.id DESC"
 	}
 	query := itemQuery + " WHERE " + where + " ORDER BY " + order +
@@ -232,7 +268,7 @@ func validateMedia(input MediaInput) error {
 }
 
 func ParseFilters(values url.Values, favorites bool) (Filters, error) {
-	filters := Filters{Type: values.Get("type"), Sort: values.Get("sort"), Limit: 20}
+	filters := Filters{Type: values.Get("type"), Sort: values.Get("sort"), Status: "all", Limit: 20}
 	if filters.Type == "" {
 		filters.Type = "all"
 	}
@@ -244,6 +280,14 @@ func ParseFilters(values url.Values, favorites bool) (Filters, error) {
 	}
 	if filters.Sort != "recent" && filters.Sort != "oldest" && filters.Sort != "title" {
 		return Filters{}, fmt.Errorf("%w: sort is invalid", ErrInvalidInput)
+	}
+	if raw := values.Get("status"); raw != "" {
+		if raw != "all" {
+			if _, err := normalizeStatus(raw); err != nil {
+				return Filters{}, err
+			}
+		}
+		filters.Status = raw
 	}
 	if raw := values.Get("limit"); raw != "" {
 		value, err := strconv.Atoi(raw)

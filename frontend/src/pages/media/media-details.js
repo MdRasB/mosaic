@@ -3,6 +3,7 @@ import { errorState } from "../../components/empty-state/empty-state.js";
 import { mediaRow } from "../../components/media-row/media-row.js";
 import { escapeHtml } from "../../utils/escape-html.js";
 import { collectionService } from "../../collection/collection-service.js";
+import { watchlistService } from "../../watchlist/watchlist-service.js";
 
 const validTypes = new Set(["movie", "tv"]);
 
@@ -70,6 +71,7 @@ function detailsMarkup(media, currentUser) {
                 ${currentUser
                   ? `<button class="button button-primary" type="button" data-add-collection>Add to Collection</button>
                      <button class="button button-ghost" type="button" data-add-favorite>Add to Favorites</button>
+                     <button class="button button-ghost" type="button" data-toggle-watchlist aria-pressed="false">Add to Watchlist</button>
                      <span class="muted" data-collection-status></span>`
                   : `<a class="button button-primary" href="/login?redirect=${encodeURIComponent(window.location.pathname)}">Sign in to save this title</a>`}
               </div>
@@ -142,8 +144,13 @@ export async function renderMediaDetailsPage(container, route, currentUser = nul
   async function bindCollectionActions(container, media) {
     const addButton = container.querySelector("[data-add-collection]");
     const favoriteButton = container.querySelector("[data-add-favorite]");
+    const watchlistButton = container.querySelector("[data-toggle-watchlist]");
     const status = container.querySelector("[data-collection-status]");
-    if (!addButton || !favoriteButton) return;
+    if (!addButton || !favoriteButton || !watchlistButton) return;
+    const applyWatchlistState = (onWatchlist) => {
+      watchlistButton.textContent = onWatchlist ? "Remove from Watchlist" : "Add to Watchlist";
+      watchlistButton.setAttribute("aria-pressed", String(onWatchlist));
+    };
     try {
       const result = await collectionService.check(collectionInput(media));
       const item = result.item;
@@ -155,6 +162,9 @@ export async function renderMediaDetailsPage(container, route, currentUser = nul
         favoriteButton.textContent = item.is_favorite ? "Remove from Favorites" : "Add to Favorites";
         favoriteButton.dataset.collectionId = item.id;
         favoriteButton.dataset.favorite = String(item.is_favorite);
+        watchlistButton.dataset.collectionId = item.id;
+        watchlistButton.dataset.onWatchlist = String(Boolean(item.status));
+        applyWatchlistState(Boolean(item.status));
       }
     } catch (error) {
       status.textContent = error.message;
@@ -187,6 +197,24 @@ export async function renderMediaDetailsPage(container, route, currentUser = nul
         status.textContent = error.message;
       } finally {
         favoriteButton.disabled = false;
+      }
+    });
+    watchlistButton.addEventListener("click", async () => {
+      const onWatchlist = watchlistButton.dataset.onWatchlist === "true";
+      watchlistButton.disabled = true;
+      try {
+        const item = onWatchlist
+          ? await watchlistService.remove(watchlistButton.dataset.collectionId)
+          : await watchlistService.add(collectionInput(media));
+        // Removing returns no body, so the saved state is derived from the request.
+        watchlistButton.dataset.collectionId = item?.id ?? watchlistButton.dataset.collectionId;
+        watchlistButton.dataset.onWatchlist = String(!onWatchlist);
+        applyWatchlistState(!onWatchlist);
+        status.textContent = onWatchlist ? "Removed from your watchlist." : "Added to your watchlist.";
+      } catch (error) {
+        status.textContent = error.message;
+      } finally {
+        watchlistButton.disabled = false;
       }
     });
   }

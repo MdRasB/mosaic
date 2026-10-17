@@ -119,6 +119,106 @@ func (h *Handler) Favorites(w http.ResponseWriter, r *http.Request) {
 	methodError(w, "GET, PUT, OPTIONS")
 }
 
+func (h *Handler) Watchlist(w http.ResponseWriter, r *http.Request) {
+	user, ok := h.user(w, r)
+	if !ok {
+		return
+	}
+	if r.URL.Path == "/api/v1/watchlist" {
+		switch r.Method {
+		case http.MethodGet:
+			h.listWatchlist(w, r, user.ID)
+		case http.MethodPost:
+			h.addWatchlist(w, r, user.ID)
+		default:
+			methodError(w, "GET, POST, OPTIONS")
+		}
+		return
+	}
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(parts) != 4 && len(parts) != 5 || parts[0] != "api" || parts[1] != "v1" || parts[2] != "watchlist" {
+		http.NotFound(w, r)
+		return
+	}
+	itemID, err := strconv.ParseInt(parts[3], 10, 64)
+	if err != nil || itemID < 1 {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"code": "invalid_id", "message": "Watchlist item ID is invalid."})
+		return
+	}
+	action := ""
+	if len(parts) == 5 {
+		action = parts[4]
+	}
+	switch action {
+	case "status":
+		if r.Method != http.MethodPut {
+			methodError(w, "PUT, OPTIONS")
+			return
+		}
+		h.setStatus(w, r, user.ID, itemID)
+	case "":
+		if r.Method != http.MethodDelete {
+			methodError(w, "DELETE, OPTIONS")
+			return
+		}
+		if err := h.service.RemoveWatchlist(r.Context(), user.ID, itemID); err != nil {
+			h.serviceError(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (h *Handler) addWatchlist(w http.ResponseWriter, r *http.Request, userID string) {
+	var input MediaInput
+	if !decodeJSON(w, r, &input) {
+		return
+	}
+	item, created, err := h.service.AddWatchlist(r.Context(), userID, input)
+	if err != nil {
+		h.serviceError(w, err)
+		return
+	}
+	status := http.StatusOK
+	if created {
+		status = http.StatusCreated
+	}
+	writeJSON(w, status, item)
+}
+
+func (h *Handler) listWatchlist(w http.ResponseWriter, r *http.Request, userID string) {
+	filters, err := ParseFilters(r.URL.Query(), false)
+	if err != nil {
+		h.serviceError(w, err)
+		return
+	}
+	result, err := h.service.ListWatchlist(r.Context(), userID, filters)
+	if err != nil {
+		h.serviceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+type statusRequest struct {
+	Status string `json:"status"`
+}
+
+func (h *Handler) setStatus(w http.ResponseWriter, r *http.Request, userID string, itemID int64) {
+	var input statusRequest
+	if !decodeJSON(w, r, &input) {
+		return
+	}
+	item, err := h.service.SetStatus(r.Context(), userID, itemID, input.Status)
+	if err != nil {
+		h.serviceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, item)
+}
+
 func (h *Handler) user(w http.ResponseWriter, r *http.Request) (auth.User, bool) {
 	user, err := h.auth.CurrentUser(r.Context(), h.sessionToken(r))
 	if errors.Is(err, auth.ErrSessionNotFound) {
@@ -177,7 +277,7 @@ func (h *Handler) serviceError(w http.ResponseWriter, err error) {
 	case errors.Is(err, ErrInvalidInput):
 		writeJSON(w, http.StatusBadRequest, map[string]string{"code": "invalid_input", "message": err.Error()})
 	case errors.Is(err, ErrNotFound):
-		writeJSON(w, http.StatusNotFound, map[string]string{"code": "not_found", "message": "Collection item not found."})
+		writeJSON(w, http.StatusNotFound, map[string]string{"code": "not_found", "message": "Saved title not found."})
 	default:
 		http.Error(w, "service unavailable", http.StatusServiceUnavailable)
 	}
