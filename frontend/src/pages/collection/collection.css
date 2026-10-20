@@ -111,8 +111,15 @@
 }
 
 .collection-favorite {
+  align-items: center;
   color: var(--color-muted);
+  display: inline-flex;
   font-size: 1.5rem;
+  justify-content: center;
+  line-height: 1;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0;
 }
 
 .collection-favorite.is-favorite {
