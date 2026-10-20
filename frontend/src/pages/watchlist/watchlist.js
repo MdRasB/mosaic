@@ -1,23 +1,13 @@
 import { imageUrl } from "../../api/tmdb.js";
 import { watchlistService } from "../../watchlist/watchlist-service.js";
 import { escapeHtml } from "../../utils/escape-html.js";
-
-const statuses = [
-  ["watchlist", "Watchlist"],
-  ["watching", "Watching"],
-  ["completed", "Completed"],
-  ["paused", "Paused"],
-  ["dropped", "Dropped"]
-];
+import { renderStatusSelect } from "../../components/status-select/status-select.js";
+import { STATUS_OPTIONS as statuses, statusLabel } from "../../status/status-config.js";
 
 function formatDate(value) {
   return value
     ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(value))
     : "Date unavailable";
-}
-
-function statusLabel(value) {
-  return statuses.find(([status]) => status === value)?.[1] ?? "On watchlist";
 }
 
 function typeLabel(value) {
@@ -48,6 +38,7 @@ function mediaCard(item) {
             ${statuses.map(([status, label]) => `<option value="${status}" ${status === current ? "selected" : ""}>${label}</option>`).join("")}
           </select>
         </label>
+        <button class="button button-ghost watchlist-history" type="button" data-history-id="${item.id}">History</button>
         <button class="button button-ghost watchlist-remove" type="button" data-remove-id="${item.id}">Remove</button>
       </div>
     </article>`;
@@ -139,6 +130,10 @@ export async function renderWatchlistPage(container) {
 
   function paint() {
     grid.innerHTML = items.length ? items.map(mediaCard).join("") : emptyMarkup(filters);
+    container.querySelectorAll("[data-status-id]").forEach((select) => {
+      const item = items.find((entry) => String(entry.id) === select.dataset.statusId);
+      renderStatusSelect(select, item?.status ?? "watchlist");
+    });
     bindActions();
   }
 
@@ -173,23 +168,36 @@ export async function renderWatchlistPage(container) {
   function bindActions() {
     container.querySelectorAll("[data-status-id]").forEach((select) => {
       select.addEventListener("change", async () => {
-        select.disabled = true;
-        try {
-          const updated = await watchlistService.setStatus(select.dataset.statusId, select.value);
-          message.textContent = `“${updated.media.title}” is now ${statusLabel(updated.status).toLowerCase()}.`;
-          if (filters.status !== "all" && updated.status !== filters.status) {
-            items = items.filter((entry) => entry.id !== updated.id);
-            total = Math.max(0, total - 1);
-            refreshCount();
-          } else {
-            items = items.map((entry) => (entry.id === updated.id ? updated : entry));
-          }
-          paint();
-        } catch (error) {
-          message.textContent = error.message;
-          select.disabled = false;
-        }
-      });
+      const currentItem = items.find((entry) => String(entry.id) === select.dataset.statusId);
+      const previous = currentItem?.status ?? "watchlist";
+      select.disabled = true;
+      try {
+        const updated = await watchlistService.setStatus(select.dataset.statusId, select.value);
+        message.textContent = `“${updated.media.title}” is now ${statusLabel(updated.status).toLowerCase()}.`;
+        await load(true);
+      } catch (error) {
+        select.value = previous;
+        message.textContent = error.message;
+        select.disabled = false;
+      }
+    });
+    });
+    container.querySelectorAll("[data-history-id]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      try {
+        const result = await watchlistService.history(button.dataset.historyId);
+        const item = items.find((entry) => String(entry.id) === button.dataset.historyId);
+        const history = result.items.length
+          ? result.items.map((entry) => `${entry.previous_status ? statusLabel(entry.previous_status) : "Not tracking"} → ${statusLabel(entry.new_status)}`).join(" · ")
+          : "No status changes recorded yet.";
+        message.textContent = item ? `${item.media.title}: ${history}` : history;
+      } catch (error) {
+        message.textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
     });
     container.querySelectorAll("[data-remove-id]").forEach((button) => {
       button.addEventListener("click", async () => {

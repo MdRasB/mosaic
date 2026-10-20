@@ -10,5 +10,6 @@ export const watchlistService = {
   setStatus: (id, status) => requestJSON(`/watchlist/${id}/status`, {
     method: "PUT",
     body: JSON.stringify({ status })
-  })
+  }),
+  history: (id) => requestJSON(`/watchlist/${id}/history`)
 };

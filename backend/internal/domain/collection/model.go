@@ -21,14 +21,15 @@ type Media struct {
 }
 
 type Item struct {
-	ID           int64      `json:"id"`
-	Media        Media      `json:"media"`
-	InCollection bool       `json:"in_collection"`
-	IsFavorite   bool       `json:"is_favorite"`
-	Status       *string    `json:"status"`
-	CreatedAt    time.Time  `json:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at"`
-	FavoritedAt  *time.Time `json:"favorited_at,omitempty"`
+	ID              int64      `json:"id"`
+	Media           Media      `json:"media"`
+	InCollection    bool       `json:"in_collection"`
+	IsFavorite      bool       `json:"is_favorite"`
+	Status          *string    `json:"status"`
+	StatusChangedAt *time.Time `json:"status_changed_at,omitempty"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
+	FavoritedAt     *time.Time `json:"favorited_at,omitempty"`
 }
 
 type Filters struct {
