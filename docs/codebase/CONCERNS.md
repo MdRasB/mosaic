@@ -8,6 +8,7 @@
 | medium | Uploaded avatar bytes are stored in the profile row | `backend/internal/profile/service.go`, `supabase/migrations/20261014120000_profile_avatar_upload.sql` | Keep the 2 MiB cap; migrate to object storage if profile volume or traffic grows. |
 | medium | Free hosting services may sleep or change limits | `docs/deployment/FREE-HOSTING.md` | Recheck provider terms before release and document cold starts. |
 | medium | Frontend has no automated browser tests | `frontend/package.json` | Add route/page tests or a browser smoke suite when auth is introduced. |
+| medium | Collection, favorites, and watchlist share one `user_media` row | `backend/internal/domain/collection/service.go`, `backend/internal/domain/collection/watchlist.go` | Keep list removal membership-aware so one list never clears another; any new list must set or clear a flag rather than deleting the row. |
 
 ## Technical debt
 
@@ -20,6 +21,11 @@
 - Avatar validation limits bytes and MIME signatures but does not enforce
   decoded image dimensions; add bounded image-dimension validation before
   accepting untrusted uploads if avatar usage expands.
+- Watchlist membership is the `user_media.status` column, so a row is on the
+  watchlist exactly when `status IS NOT NULL`. Queries that count or clear
+  saved titles must respect that instead of assuming a dedicated table.
+- The database still relies on Go for ownership filtering rather than row-level
+  security; every saved-title query must keep its `user_id` predicate.
 
 ## Security gaps
 
@@ -38,6 +44,7 @@ upload test remain `[TODO]`.
 - `frontend/src/api/http.js`
 - `frontend/src/profile/profile-service.js`
 - `supabase/migrations/20261014120000_profile_avatar_upload.sql`
+- `supabase/migrations/20261017120000_watchlist.sql`
+- `backend/internal/domain/collection/watchlist.go`
 - `database/schema/.gitkeep`
-- `docs/M04-M05-MERGED-PLAN.md`
 - `docs/deployment/FREE-HOSTING.md`
