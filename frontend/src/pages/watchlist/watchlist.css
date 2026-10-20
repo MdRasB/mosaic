@@ -112,13 +112,21 @@
   align-items: center;
   border-top: 1px solid var(--color-border);
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: var(--space-3);
 }
 
 .watchlist-status select {
+  min-width: 0;
   padding: 0.4rem 0.5rem;
+}
+
+.watchlist-history,
+.watchlist-remove {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .watchlist-state {
@@ -145,4 +153,6 @@
   .watchlist-heading, .watchlist-toolbar { align-items: start; flex-direction: column; }
   .watchlist-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
   .watchlist-card-actions { align-items: stretch; flex-direction: column; }
+  .watchlist-status, .watchlist-status select,
+  .watchlist-history, .watchlist-remove { width: 100%; }
 }
