@@ -114,18 +114,31 @@ func (s *Service) Find(ctx context.Context, userID string, input MediaInput) (It
 // title is in no list at all, so removing a collection entry does not drop a
 // favorite or a watchlist status recorded for the same title.
 func (s *Service) Remove(ctx context.Context, userID string, itemID int64) error {
-	result, err := s.db.Exec(ctx, `UPDATE user_media SET in_collection = FALSE, updated_at = now()
-		WHERE id = $1 AND user_id = $2 AND in_collection = TRUE`, itemID, userID)
+	tx, err := s.db.Begin(ctx)
 	if err != nil {
+		return fmt.Errorf("begin remove collection transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+	var inCollection bool
+	if err := tx.QueryRow(ctx, `SELECT in_collection FROM user_media
+		WHERE id = $1 AND user_id = $2 AND in_collection = TRUE FOR UPDATE`,
+		itemID, userID).Scan(&inCollection); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrNotFound
+		}
+		return fmt.Errorf("lock collection item: %w", err)
+	}
+	if _, err := tx.Exec(ctx, `UPDATE user_media SET in_collection = FALSE, updated_at = now()
+		WHERE id = $1 AND user_id = $2`, itemID, userID); err != nil {
 		return fmt.Errorf("remove collection membership: %w", err)
 	}
-	if result.RowsAffected() == 0 {
-		return ErrNotFound
-	}
-	if _, err := s.db.Exec(ctx, `DELETE FROM user_media
+	if _, err := tx.Exec(ctx, `DELETE FROM user_media
 		WHERE id = $1 AND user_id = $2 AND in_collection = FALSE
 			AND is_favorite = FALSE AND status IS NULL`, itemID, userID); err != nil {
 		return fmt.Errorf("delete empty user media row: %w", err)
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("commit remove collection transaction: %w", err)
 	}
 	return nil
 }
@@ -226,13 +239,14 @@ func (s *Service) list(ctx context.Context, userID string, filters Filters, scop
 
 const itemQuery = `SELECT um.id, mi.provider, mi.media_type, mi.provider_media_id,
 	mi.title, mi.poster_path, mi.release_date::text, um.in_collection, um.is_favorite, um.status,
-	um.created_at, um.updated_at, um.favorited_at FROM user_media um
+	um.status_changed_at, um.created_at, um.updated_at, um.favorited_at FROM user_media um
 	JOIN media_items mi ON mi.id = um.media_id`
 
 func scanArgs(item *Item) []any {
 	return []any{&item.ID, &item.Media.Provider, &item.Media.MediaType, &item.Media.ProviderMediaID,
 		&item.Media.Title, &item.Media.PosterPath, &item.Media.ReleaseDate, &item.InCollection,
-		&item.IsFavorite, &item.Status, &item.CreatedAt, &item.UpdatedAt, &item.FavoritedAt}
+		&item.IsFavorite, &item.Status, &item.StatusChangedAt, &item.CreatedAt,
+		&item.UpdatedAt, &item.FavoritedAt}
 }
 
 func normalizeMedia(input MediaInput) (MediaInput, error) {
