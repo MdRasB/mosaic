@@ -29,6 +29,7 @@ watchlist reads/writes.
 | POST | `/api/v1/watchlist` | Add a title to the watchlist |
 | DELETE | `/api/v1/watchlist/{id}` | Remove a title from the watchlist |
 | PUT | `/api/v1/watchlist/{id}/status` | Set watchlist status |
+| GET | `/api/v1/watchlist/{id}/history` | Read owned status history |
 
 All of these require the session cookie and return `{"code","message"}` errors.
 
@@ -56,6 +57,7 @@ requested with the core response and is rendered only when available.
 - `backend/internal/domain/collection/handler.go`
 - `backend/internal/domain/collection/service.go`
 - `backend/internal/domain/collection/watchlist.go`
+- `backend/internal/domain/collection/status_history.go`
 - `frontend/src/watchlist/watchlist-service.js`
 - `.gitignore`
 - `compose.yml`

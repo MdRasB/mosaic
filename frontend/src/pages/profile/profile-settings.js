@@ -20,6 +20,7 @@ function formMarkup(profile) {
         <label>Username
           <input name="username" required minlength="3" maxlength="24" pattern="[a-z0-9_]+" value="${escapeHtml(profile.username)}" autocomplete="username">
           <span class="field-help">3–24 lowercase letters, numbers, or underscores.</span>
+          <span class="field-help field-help-error" data-username-error role="alert" hidden></span>
         </label>
         <label>Display name
           <input name="display_name" required maxlength="60" value="${escapeHtml(profile.display_name)}">
@@ -69,6 +70,11 @@ export async function renderProfileSettings(container) {
     container.innerHTML = formMarkup(profile);
     const form = container.querySelector("#profile-form");
     const message = container.querySelector("#profile-form-message");
+    const usernameError = form.querySelector("[data-username-error]");
+    form.elements.username.addEventListener("input", () => {
+      usernameError.hidden = true;
+      usernameError.textContent = "";
+    });
     const bio = form.elements.bio;
     const counter = form.querySelector("[data-bio-count]");
     bio.addEventListener("input", () => { counter.textContent = bio.value.length; });
@@ -181,6 +187,10 @@ export async function renderProfileSettings(container) {
           ? "Profile saved. Avatar image updated."
           : "Profile saved.";
       } catch (error) {
+        if (error.message.toLowerCase().includes("username")) {
+          usernameError.textContent = "That username is not available. Choose another one.";
+          usernameError.hidden = false;
+        }
         message.textContent = error.message;
       } finally {
         button.disabled = false;

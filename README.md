@@ -145,12 +145,13 @@ not add it to the collection, and removing a collection item preserves its
 favorite state.
 
 The authenticated watchlist route is `/watchlist`. Watchlist operations use the
-Go API (`/api/v1/watchlist`) and the
-`supabase/migrations/20261017120000_watchlist.sql` status constraint; apply that
-migration before deploying. A title is on the watchlist when its saved-media row
-has a status, and that status is one of `watchlist`, `watching`, `completed`,
-`paused`, or `dropped`. Watchlist membership is independent of collection and
-favorites, and a saved title is deleted only once it belongs to no list.
+Go API (`/api/v1/watchlist`). Apply the watchlist and status migrations before
+deploying. A title is on the watchlist when its saved-media row has a status,
+and that status is one of `watchlist`, `watching`, `completed`, `paused`, or
+`dropped`. Watchlist membership is independent of collection and favorites, and
+a saved title is deleted only once it belongs to no list. Status changes update
+`status_changed_at` transactionally and are recorded at
+`GET /api/v1/watchlist/{id}/history`.
 
 During local Vite development, API requests intentionally use the relative
 `/api` proxy even if `VITE_API_BASE_URL` is present in `frontend/.env`. This

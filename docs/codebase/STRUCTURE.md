@@ -38,7 +38,8 @@ requests are centralized in `frontend/src/collection/collection-service.js` and
 handles graceful shutdown. `backend/internal/httpserver/server.go` owns
 `/health`, auth, profile, collection, favorite, and watchlist routes, and CORS.
 `backend/internal/domain/collection/` owns the shared saved-media queries:
-`service.go` (collection and favorites), `watchlist.go` (watchlist and status),
+`service.go` (collection and favorites), `watchlist.go` (watchlist operations),
+`status.go` and `status_history.go` (centralized status and history),
 and `handler.go` (HTTP handlers for all three). `backend/internal/config/config.go`
 owns environment defaults.
 

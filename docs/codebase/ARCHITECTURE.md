@@ -34,7 +34,7 @@ the multipart boundary.
 | `watchlist/` | Watchlist API requests | `frontend/src/watchlist/watchlist-service.js` |
 | Go `httpserver` | HTTP handlers and CORS | `backend/internal/httpserver/server.go` |
 | Go `auth`/`profile` | Sessions, profile validation, avatar persistence | `backend/internal/auth`, `backend/internal/profile` |
-| Go `domain/collection` | Collection, favorites, and watchlist reads/writes | `backend/internal/domain/collection/service.go`, `backend/internal/domain/collection/watchlist.go` |
+| Go `domain/collection` | Collection, favorites, watchlist, and status-history reads/writes | `backend/internal/domain/collection/service.go`, `backend/internal/domain/collection/watchlist.go`, `backend/internal/domain/collection/status_history.go` |
 | Supabase PostgreSQL | Users, sessions, profiles, saved media, watchlist status | `supabase/migrations/` |
 | Compose/database | Local PostgreSQL lifecycle | `compose.yml` |
 
@@ -64,4 +64,7 @@ uses constraints for value validity rather than row-level security.
 - `backend/internal/httpserver/server.go`
 - `backend/internal/domain/collection/watchlist.go`
 - `supabase/migrations/20261015120000_collection_favorites.sql`
+- `backend/internal/domain/collection/status.go`
+- `backend/internal/domain/collection/status_history.go`
 - `supabase/migrations/20261017120000_watchlist.sql`
+- `supabase/migrations/20261020120000_status_tracking.sql`

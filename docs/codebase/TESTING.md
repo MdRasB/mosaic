@@ -29,7 +29,8 @@ automated browser tests for TMDB requests, route parsing, rendering, responsive
 layout, browser history, or multipart upload transport.
 
 Collection media identity and filter validation have unit coverage. Watchlist
-status validation and its filter parsing have unit coverage
+status validation and its filter parsing have unit coverage; status history and
+transactional database behavior require integration coverage
 (`watchlist_test.go`). The collection/favorite/watchlist database
 transactions and browser pages still require integration/manual smoke tests.
 
