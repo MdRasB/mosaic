@@ -16,8 +16,9 @@
 `frontend/index.html` loads `frontend/src/main.js`. `main.js` handles the
 client-side route switch and shell events. Page modules live under
 `frontend/src/pages/`; shared renderers live under `frontend/src/components/`;
-TMDB access is centralized in `frontend/src/api/tmdb.js`, while collection
-requests are centralized in `frontend/src/collection/collection-service.js`.
+TMDB access is centralized in `frontend/src/api/tmdb.js`, while personal-list
+requests are centralized in `frontend/src/collection/collection-service.js` and
+`frontend/src/watchlist/watchlist-service.js`.
 
 ## Current page modules
 
@@ -28,12 +29,17 @@ requests are centralized in `frontend/src/collection/collection-service.js`.
 - `pages/profile/`: profile card and editable settings, including avatar upload
   controls.
 - `pages/collection/`: authenticated collection and favorites pages.
+- `pages/watchlist/`: authenticated watchlist page with type, status, and sort
+  filters.
 
 ## Backend entry points
 
 `backend/cmd/api/main.go` loads configuration, creates the HTTP server, and
-handles graceful shutdown. `backend/internal/httpserver/server.go` owns `/health`, auth, profile,
-collection, favorite routes, and CORS. `backend/internal/config/config.go`
+handles graceful shutdown. `backend/internal/httpserver/server.go` owns
+`/health`, auth, profile, collection, favorite, and watchlist routes, and CORS.
+`backend/internal/domain/collection/` owns the shared saved-media queries:
+`service.go` (collection and favorites), `watchlist.go` (watchlist and status),
+and `handler.go` (HTTP handlers for all three). `backend/internal/config/config.go`
 owns environment defaults.
 
 ## Evidence
@@ -41,9 +47,12 @@ owns environment defaults.
 - `frontend/index.html`
 - `frontend/src/main.js`
 - `frontend/src/pages/media/media-details.js`
+- `frontend/src/pages/watchlist/watchlist.js`
 - `backend/cmd/api/main.go`
 - `backend/internal/httpserver/server.go`
 - `backend/internal/domain/collection/handler.go`
 - `backend/internal/domain/collection/service.go`
+- `backend/internal/domain/collection/watchlist.go`
 - `supabase/migrations/20261015120000_collection_favorites.sql`
+- `supabase/migrations/20261017120000_watchlist.sql`
 - `compose.yml`

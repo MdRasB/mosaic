@@ -6,10 +6,11 @@ application: visitors can explore TMDB-powered media rows, search movies and
 TV shows, inspect search suggestions, switch themes, and use the responsive
 desktop/mobile shell.
 
-The repository also contains a Go API foundation, PostgreSQL Docker
-scaffolding, and the public M04 media-details page. Authentication,
-collections, favorites, watchlists, ratings, reviews, and user data persistence
-remain planned for later modules.
+The repository also contains the Go API, PostgreSQL scaffolding, and the
+public M04 media-details page. Signed-in users get Go-owned accounts and
+profiles plus three personal lists: a collection, favorites, and a watchlist
+with per-title status. Ratings, reviews, social features, and photos remain
+planned for later modules.
 
 > **Current implementation note:** This document describes what exists in the
 > repository today. Planned directories are preserved with `.gitkeep` files,
@@ -40,16 +41,21 @@ remain planned for later modules.
 - Provides local PostgreSQL infrastructure through Docker Compose.
 - Provides public `/media/movie/:id` and `/media/tv/:id` details pages with
   loading, invalid-route, retry, related-media, and metadata states.
+- Provides email/password accounts with an HttpOnly session cookie, Argon2id
+  password hashing, session restore, and protected routes.
+- Provides a profile with username, display name, bio, visibility, and avatar
+  upload.
+- Provides `/collection` and `/favorites` pages with type and sort filters.
+- Provides `/watchlist` with add/remove from the media details page, type and
+  status filters, sorting, and per-title status transitions.
 
 ### What is not implemented yet
 
-- Authentication and account management.
-- User collections, favorites, and watchlists.
-- Ratings, reviews, social features, and profile pages.
-- Supabase integration and row-level security.
-- Application database schema, seeds, and policies.
-- Backend media services and repositories.
-- Automated frontend tests and browser end-to-end tests.
+- Ratings and reviews.
+- Status tracking dashboards (for example "continue watching" and "completed").
+- Social features: friends, activity, notifications, and comparison.
+- Photos and albums.
+- Row-level security policies and automated frontend/browser tests.
 
 ## Documentation map
 
@@ -64,7 +70,6 @@ remain planned for later modules.
 | [`docs/codebase/TESTING.md`](docs/codebase/TESTING.md) | Current test commands and coverage gaps |
 | [`docs/codebase/CONCERNS.md`](docs/codebase/CONCERNS.md) | Current risks, technical debt, and scaling concerns |
 | [`docs/Mosaic_Project_Complete_Plan_Final.md`](docs/Mosaic_Project_Complete_Plan_Final.md) | Canonical project plan and module roadmap |
-| [`docs/M04-M05-MERGED-PLAN.md`](docs/M04-M05-MERGED-PLAN.md) | Reconciled M04/M05 implementation plan |
 | [`docs/deployment/FREE-HOSTING.md`](docs/deployment/FREE-HOSTING.md) | Free hosting and local deployment model |
 
 ## Project structure
@@ -73,6 +78,9 @@ remain planned for later modules.
 .
 ├── backend/
 │   ├── cmd/api/main.go                 Go API entrypoint
+│   ├── internal/auth/                  Registration, login, sessions, Argon2id
+│   ├── internal/profile/               Profile reads, updates, avatar storage
+│   ├── internal/domain/collection/     Collection, favorites, watchlist
 │   ├── internal/config/config.go       Environment configuration
 │   ├── internal/httpserver/server.go   HTTP routes and CORS
 │   ├── internal/httpserver/server_test.go
@@ -91,11 +99,16 @@ remain planned for later modules.
 │   ├── public/                         Static assets and config fallback
 │   └── src/
 │       ├── api/                        TMDB request and normalization layer
+│       ├── auth/                       Session API client
+│       ├── collection/                 Collection and favorites API client
+│       ├── watchlist/                  Watchlist API client
+│       ├── profile/                    Profile API client and avatar helpers
 │       ├── components/                 Reusable UI components
 │       ├── pages/                      Route-level page modules
 │       ├── styles/                     Global and responsive CSS
 │       ├── utils/                      Small shared utilities
 │       └── main.js                     Browser entrypoint and route controller
+├── supabase/migrations/               Versioned PostgreSQL migrations
 ├── scripts/                            Planned seed/maintenance scripts
 ├── compose.yml                         Local PostgreSQL service
 ├── LICENSE                             Apache License 2.0
@@ -167,7 +180,9 @@ auth placeholders, profile placeholder, toast, modal, and `#app-content`.
 3. Handles placeholder authentication/profile actions.
 4. Prevents the active Explore sidebar link from reloading the current page.
 5. Preserves ordinary navigation for Mosaic branding links.
-6. Routes `/`, `/explore`, `/search`, and `/media/...`.
+6. Routes `/`, `/explore`, `/search`, and `/media/...` publicly, and
+   `/collection`, `/favorites`, `/watchlist`, `/profile`, `/settings/profile`,
+   and `/dashboard` for signed-in users.
 7. Handles search submission with `history.pushState`.
 8. Rerenders routes when browser Back/Forward emits `popstate`.
 
@@ -223,6 +238,27 @@ last input before requesting TMDB results. It supports ArrowUp, ArrowDown,
 Enter, Escape, focus reopening, outside-click dismissal, and accessible
 combobox/listbox attributes.
 
+## Personal lists
+
+Collection, favorites, and watchlist are three views over one `user_media`
+relationship, not three tables. The Go API owns every read and write and filters
+each query by the authenticated `user_id`.
+
+| List | Membership marker | Page |
+|---|---|---|
+| Collection | `in_collection` | `/collection` |
+| Favorites | `is_favorite` (with `favorited_at`) | `/favorites` |
+| Watchlist | `status IS NOT NULL` | `/watchlist` |
+
+Watchlist status is one of `watchlist`, `watching`, `completed`, `paused`, or
+`dropped`. `user_media` rows are deleted only once a title belongs to no list,
+so removing a collection entry keeps a favorite or watchlist status intact.
+
+`frontend/src/pages/watchlist/watchlist.js` reads `type`, `status`, and `sort`
+from the query string so the view is refresh- and history-safe, renders
+loading/empty/error states with retry, and applies status changes and removals
+without a full reload.
+
 ## TMDB and content safety
 
 `frontend/src/api/tmdb.js` is the centralized TMDB client.
@@ -261,10 +297,31 @@ release. It must never be replaced with a Supabase secret or service-role key.
 - registers `GET /health`;
 - returns `{"status":"ok"}`;
 - rejects non-GET health requests with HTTP 405;
+- registers the auth, profile, collection, favorites, and watchlist routes when
+  a database pool is configured;
 - handles CORS headers and OPTIONS preflight requests.
 
 `backend/internal/httpserver/server_test.go` uses `httptest` to verify the
 health response and method rejection without external services.
+
+### Personal-list API
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/collection` | Saved collection, with `type`, `sort`, `limit`, `offset` |
+| POST | `/api/v1/collection` | Add a title to the collection |
+| DELETE | `/api/v1/collection/{id}` | Remove a title from the collection |
+| PUT/DELETE | `/api/v1/collection/{id}/favorite` | Set or clear a favorite |
+| GET | `/api/v1/collection/check` | Saved state for one title |
+| GET | `/api/v1/favorites` | Favorite titles |
+| PUT | `/api/v1/favorites/media` | Favorite a title directly |
+| GET | `/api/v1/watchlist` | Watchlisted titles, with `type`, `status`, `sort`, `limit`, `offset` |
+| POST | `/api/v1/watchlist` | Add a title to the watchlist |
+| DELETE | `/api/v1/watchlist/{id}` | Remove a title from the watchlist |
+| PUT | `/api/v1/watchlist/{id}/status` | Set watchlist status |
+
+Watchlist status must be one of `watchlist`, `watching`, `completed`, `paused`,
+or `dropped`; the database enforces the same list with a check constraint.
 
 ### PostgreSQL
 
@@ -276,8 +333,12 @@ health response and method rejection without external services.
 - read-only schema initialization mount;
 - `pg_isready` healthcheck.
 
-The database directories are currently scaffolding. No application schema,
-seed data, or policy implementation is present yet.
+The `database/` directories are still scaffolding. The applied schema lives in
+`supabase/migrations/` and is the source of truth: accounts and sessions,
+profiles and avatar bytes, saved media with collection/favorite membership,
+and the watchlist status constraint. `make db-migrate` applies those files
+locally, and the Supabase GitHub integration applies pending files in
+production. No seed data or row-level security policies exist yet.
 
 ## Configuration
 
@@ -382,15 +443,22 @@ repository workflow.
 | M01 shell/design foundation | Implemented |
 | M02 public Explore | Implemented |
 | M03 global search | Implemented |
-| M04 media details | Planned |
-| M05 authentication | Planned |
-| Collections/favorites/watchlist | Planned |
-| Ratings/reviews/social features | Planned |
-| Database schema and policies | Planned |
+| M04 media details | Implemented |
+| M05 authentication | Implemented |
+| M06 profile | Implemented |
+| M07 collection | Implemented |
+| M08 favorites | Implemented |
+| M09 watchlist | Implemented |
+| M10 status dashboards | Planned |
+| M11 ratings and reviews | Planned |
+| Social, photos, and multi-media types | Planned |
+| Row-level security policies | Planned |
 
-M03 ends at search results and navigation to media routes. M04 begins at the
-media details experience. Authentication and user-owned features should not be
-introduced into the public search layer prematurely.
+M03 ends at search results and navigation to media routes. M09 completes the
+first personal-collection slice: saved titles, favorites, and the watchlist with
+status transitions. Status dashboards, ratings, and reviews build on that
+relationship and should not be introduced into the public search layer
+prematurely.
 
 ## Team responsibilities
 

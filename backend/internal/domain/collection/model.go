@@ -34,6 +34,7 @@ type Item struct {
 type Filters struct {
 	Type   string
 	Sort   string
+	Status string
 	Limit  int
 	Offset int
 }

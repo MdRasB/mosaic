@@ -9,6 +9,7 @@ import { renderAuthPage, renderDashboard } from "./pages/auth/auth.js";
 import { renderProfilePage } from "./pages/profile/profile.js";
 import { renderProfileSettings } from "./pages/profile/profile-settings.js";
 import { renderCollectionPage } from "./pages/collection/collection.js";
+import { renderWatchlistPage } from "./pages/watchlist/watchlist.js";
 import { saveRecentSearch } from "./utils/recent-searches.js";
 
 const themeToggle = document.querySelector("#theme-toggle");
@@ -200,13 +201,17 @@ function renderRoute() {
     } else {
       renderProfileSettings(content);
     }
-  } else if (path === "/collection" || path === "/favorites") {
+  } else if (path === "/collection" || path === "/favorites" || path === "/watchlist") {
     if (!currentUser) {
       window.history.replaceState({}, "", `/login?redirect=${encodeURIComponent(path)}`);
       renderRoute();
       return;
     }
-    renderCollectionPage(content, { favoritePage: path === "/favorites" });
+    if (path === "/watchlist") {
+      renderWatchlistPage(content);
+    } else {
+      renderCollectionPage(content, { favoritePage: path === "/favorites" });
+    }
   } else if (path === "/dashboard") {
     if (!currentUser) {
       window.history.replaceState({}, "", `/login?redirect=${encodeURIComponent(path)}`);
