@@ -123,6 +123,10 @@
   padding: 0.4rem 0.5rem;
 }
 
+.watchlist-card-actions > .watchlist-status {
+  flex: 1 1 100%;
+}
+
 .watchlist-history,
 .watchlist-remove {
   flex: 1 1 auto;
