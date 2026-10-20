@@ -29,6 +29,12 @@
   z-index: 1;
 }
 
+:root[data-theme] .explore-intro .eyebrow,
+:root[data-theme] .featured-media-content .eyebrow,
+:root[data-theme] .media-section .eyebrow {
+  color: #687800;
+}
+
 .explore-intro::after {
   background: var(--color-primary);
   border-radius: 50%;
