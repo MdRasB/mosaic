@@ -3,6 +3,7 @@ package collection
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -184,6 +185,130 @@ func (h *Handler) statusHistory(w http.ResponseWriter, r *http.Request, userID s
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"items": history})
+}
+
+// Ratings serves the personal-rating endpoints. The {itemId} path segment is a
+// user_media id, never a TMDB id.
+func (h *Handler) Ratings(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "private, no-store")
+	user, ok := h.user(w, r)
+	if !ok {
+		return
+	}
+	if r.URL.Path == "/api/v1/ratings" {
+		if r.Method != http.MethodGet {
+			methodError(w, "GET, OPTIONS")
+			return
+		}
+		h.listRatings(w, r, user.ID)
+		return
+	}
+	if r.URL.Path == "/api/v1/ratings/media" {
+		if r.Method != http.MethodPut {
+			methodError(w, "PUT, OPTIONS")
+			return
+		}
+		h.rateMedia(w, r, user.ID)
+		return
+	}
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(parts) != 4 || parts[0] != "api" || parts[1] != "v1" || parts[2] != "ratings" {
+		http.NotFound(w, r)
+		return
+	}
+	itemID, err := strconv.ParseInt(parts[3], 10, 64)
+	if err != nil || itemID < 1 {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"code": "invalid_id", "message": "Rating item ID is invalid."})
+		return
+	}
+	switch r.Method {
+	case http.MethodPut:
+		h.setRating(w, r, user.ID, itemID)
+	case http.MethodDelete:
+		if err := h.service.RemoveRating(r.Context(), user.ID, itemID); err != nil {
+			h.serviceError(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	default:
+		methodError(w, "PUT, DELETE, OPTIONS")
+	}
+}
+
+type ratingRequest struct {
+	Rating json.RawMessage `json:"rating"`
+}
+
+type rateMediaRequest struct {
+	Media  MediaInput      `json:"media"`
+	Rating json.RawMessage `json:"rating"`
+}
+
+// parseRatingPayload rejects stringified scores so only JSON numbers reach the
+// scale validator.
+func parseRatingPayload(raw json.RawMessage) (Rating, error) {
+	text := strings.TrimSpace(string(raw))
+	if text == "" || text == "null" {
+		return 0, fmt.Errorf("%w: rating is required", ErrInvalidInput)
+	}
+	if strings.HasPrefix(text, `"`) {
+		return 0, fmt.Errorf("%w: rating must be a number", ErrInvalidInput)
+	}
+	return ParseRating(json.Number(text))
+}
+
+func (h *Handler) setRating(w http.ResponseWriter, r *http.Request, userID string, itemID int64) {
+	var input ratingRequest
+	if !decodeJSON(w, r, &input) {
+		return
+	}
+	rating, err := parseRatingPayload(input.Rating)
+	if err != nil {
+		h.serviceError(w, err)
+		return
+	}
+	item, err := h.service.SetRating(r.Context(), userID, itemID, rating)
+	if err != nil {
+		h.serviceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, item)
+}
+
+func (h *Handler) rateMedia(w http.ResponseWriter, r *http.Request, userID string) {
+	var input rateMediaRequest
+	if !decodeJSON(w, r, &input) {
+		return
+	}
+	rating, err := parseRatingPayload(input.Rating)
+	if err != nil {
+		h.serviceError(w, err)
+		return
+	}
+	item, created, err := h.service.RateMedia(r.Context(), userID, input.Media, rating)
+	if err != nil {
+		h.serviceError(w, err)
+		return
+	}
+	status := http.StatusOK
+	if created {
+		status = http.StatusCreated
+	}
+	writeJSON(w, status, item)
+}
+
+func (h *Handler) listRatings(w http.ResponseWriter, r *http.Request, userID string) {
+	filters, err := ParseRatingFilters(r.URL.Query())
+	if err != nil {
+		h.serviceError(w, err)
+		return
+	}
+	result, err := h.service.ListRated(r.Context(), userID, filters)
+	if err != nil {
+		h.serviceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
 }
 
 func (h *Handler) addWatchlist(w http.ResponseWriter, r *http.Request, userID string) {

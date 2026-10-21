@@ -1,0 +1,144 @@
+.reviews-page {
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: var(--space-6) 0;
+}
+
+.reviews-heading,
+.reviews-toolbar {
+  align-items: end;
+  display: flex;
+  gap: var(--space-4);
+  justify-content: space-between;
+}
+
+.reviews-toolbar {
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  margin-top: var(--space-6);
+  padding-bottom: var(--space-4);
+}
+
+.reviews-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.reviews-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.reviews-filter {
+  align-items: center;
+  color: var(--color-muted);
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+.reviews-filter select {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  padding: 0.6rem;
+}
+
+.reviews-count {
+  margin: var(--space-5) 0 var(--space-3);
+}
+
+.reviews-list {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.my-review-row {
+  align-items: start;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 4rem minmax(0, 1fr) auto;
+  padding: var(--space-4);
+}
+
+.my-review-poster {
+  border-radius: var(--radius-sm);
+  height: 6rem;
+  object-fit: cover;
+  width: 4rem;
+}
+
+.my-review-content {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.my-review-header h2 {
+  font-size: 1.05rem;
+  margin: 0 0 var(--space-1);
+}
+
+.my-review-header p,
+.my-review-content small {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.my-review-content h3 {
+  margin: 0;
+}
+
+.my-review-excerpt {
+  color: var(--color-text);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.my-review-actions {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+
+.my-review-edit {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.reviews-state {
+  align-items: center;
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  min-height: 18rem;
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.reviews-load-more {
+  display: block;
+  margin: var(--space-6) auto 0;
+}
+
+@media (max-width: 900px) {
+  .my-review-row {
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+  }
+
+  .my-review-actions {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .reviews-heading,
+  .reviews-toolbar { align-items: start; flex-direction: column; }
+}

@@ -111,34 +111,29 @@ func (s *Service) Find(ctx context.Context, userID string, input MediaInput) (It
 }
 
 // Remove takes a title out of the collection. The row is only deleted once the
-// title is in no list at all, so removing a collection entry does not drop a
-// favorite or a watchlist status recorded for the same title.
+// title is in no list at all and holds no personal content, so removing a
+// collection entry does not drop a favorite, a watchlist status, a rating or a
+// review recorded for the same title.
 func (s *Service) Remove(ctx context.Context, userID string, itemID int64) error {
 	tx, err := s.db.Begin(ctx)
 	if err != nil {
-		return fmt.Errorf("begin remove collection transaction: %w", err)
+		return fmt.Errorf("begin collection removal: %w", err)
 	}
 	defer tx.Rollback(ctx)
-	var inCollection bool
-	if err := tx.QueryRow(ctx, `SELECT in_collection FROM user_media
-		WHERE id = $1 AND user_id = $2 AND in_collection = TRUE FOR UPDATE`,
-		itemID, userID).Scan(&inCollection); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return ErrNotFound
-		}
-		return fmt.Errorf("lock collection item: %w", err)
-	}
-	if _, err := tx.Exec(ctx, `UPDATE user_media SET in_collection = FALSE, updated_at = now()
-		WHERE id = $1 AND user_id = $2`, itemID, userID); err != nil {
+
+	result, err := tx.Exec(ctx, `UPDATE user_media SET in_collection = FALSE, updated_at = now()
+		WHERE id = $1 AND user_id = $2 AND in_collection = TRUE`, itemID, userID)
+	if err != nil {
 		return fmt.Errorf("remove collection membership: %w", err)
 	}
-	if _, err := tx.Exec(ctx, `DELETE FROM user_media
-		WHERE id = $1 AND user_id = $2 AND in_collection = FALSE
-			AND is_favorite = FALSE AND status IS NULL`, itemID, userID); err != nil {
-		return fmt.Errorf("delete empty user media row: %w", err)
+	if result.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	if err := deleteIfEmpty(ctx, tx, userID, itemID); err != nil {
+		return err
 	}
 	if err := tx.Commit(ctx); err != nil {
-		return fmt.Errorf("commit remove collection transaction: %w", err)
+		return fmt.Errorf("commit collection removal: %w", err)
 	}
 	return nil
 }
@@ -170,12 +165,20 @@ func (s *Service) ListWatchlist(ctx context.Context, userID string, filters Filt
 	return s.list(ctx, userID, filters, scopeWatchlist)
 }
 
+// ListRated returns the titles the user has given a personal rating, newest
+// first by default. Ratings are independent of collection and watchlist
+// membership, so this listing only requires rating IS NOT NULL.
+func (s *Service) ListRated(ctx context.Context, userID string, filters Filters) (ListResult, error) {
+	return s.list(ctx, userID, filters, scopeRatings)
+}
+
 type listScope int
 
 const (
 	scopeCollection listScope = iota
 	scopeFavorites
 	scopeWatchlist
+	scopeRatings
 )
 
 func (s *Service) list(ctx context.Context, userID string, filters Filters, scope listScope) (ListResult, error) {
@@ -197,6 +200,8 @@ func (s *Service) list(ctx context.Context, userID string, filters Filters, scop
 			args = append(args, filters.Status)
 			next++
 		}
+	case scopeRatings:
+		where += " AND um.rating IS NOT NULL"
 	default:
 		where += " AND um.in_collection = TRUE"
 	}
@@ -212,6 +217,15 @@ func (s *Service) list(ctx context.Context, userID string, filters Filters, scop
 		order = "mi.title ASC, um.id ASC"
 	} else if scope == scopeFavorites {
 		order = "um.favorited_at DESC, um.id DESC"
+	} else if scope == scopeRatings {
+		switch filters.Sort {
+		case "highest":
+			order = "um.rating DESC, um.rated_at DESC, um.id DESC"
+		case "lowest":
+			order = "um.rating ASC, um.rated_at DESC, um.id DESC"
+		default:
+			order = "um.rated_at DESC, um.id DESC"
+		}
 	}
 	query := itemQuery + " WHERE " + where + " ORDER BY " + order +
 		fmt.Sprintf(" LIMIT $%d OFFSET $%d", next, next+1)
@@ -239,14 +253,14 @@ func (s *Service) list(ctx context.Context, userID string, filters Filters, scop
 
 const itemQuery = `SELECT um.id, mi.provider, mi.media_type, mi.provider_media_id,
 	mi.title, mi.poster_path, mi.release_date::text, um.in_collection, um.is_favorite, um.status,
-	um.status_changed_at, um.created_at, um.updated_at, um.favorited_at FROM user_media um
+	um.status_changed_at, um.created_at, um.updated_at, um.favorited_at, um.rating::float8, um.rated_at FROM user_media um
 	JOIN media_items mi ON mi.id = um.media_id`
 
 func scanArgs(item *Item) []any {
 	return []any{&item.ID, &item.Media.Provider, &item.Media.MediaType, &item.Media.ProviderMediaID,
 		&item.Media.Title, &item.Media.PosterPath, &item.Media.ReleaseDate, &item.InCollection,
-		&item.IsFavorite, &item.Status, &item.StatusChangedAt, &item.CreatedAt,
-		&item.UpdatedAt, &item.FavoritedAt}
+		&item.IsFavorite, &item.Status, &item.StatusChangedAt, &item.CreatedAt, &item.UpdatedAt, &item.FavoritedAt,
+		&item.Rating, &item.RatedAt}
 }
 
 func normalizeMedia(input MediaInput) (MediaInput, error) {
@@ -282,6 +296,16 @@ func validateMedia(input MediaInput) error {
 }
 
 func ParseFilters(values url.Values, favorites bool) (Filters, error) {
+	return parseFilters(values, favorites, false)
+}
+
+// ParseRatingFilters accepts the rating-specific orderings (highest, lowest) in
+// addition to the orderings shared by every personal list.
+func ParseRatingFilters(values url.Values) (Filters, error) {
+	return parseFilters(values, false, true)
+}
+
+func parseFilters(values url.Values, favorites bool, ratingSorts bool) (Filters, error) {
 	filters := Filters{Type: values.Get("type"), Sort: values.Get("sort"), Status: "all", Limit: 20}
 	if filters.Type == "" {
 		filters.Type = "all"
@@ -292,7 +316,13 @@ func ParseFilters(values url.Values, favorites bool) (Filters, error) {
 	if filters.Type != "all" && filters.Type != "movie" && filters.Type != "tv" {
 		return Filters{}, fmt.Errorf("%w: type must be all, movie, or tv", ErrInvalidInput)
 	}
-	if filters.Sort != "recent" && filters.Sort != "oldest" && filters.Sort != "title" {
+	switch filters.Sort {
+	case "recent", "oldest", "title":
+	case "highest", "lowest":
+		if !ratingSorts {
+			return Filters{}, fmt.Errorf("%w: sort is invalid", ErrInvalidInput)
+		}
+	default:
 		return Filters{}, fmt.Errorf("%w: sort is invalid", ErrInvalidInput)
 	}
 	if raw := values.Get("status"); raw != "" {

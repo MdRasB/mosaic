@@ -7,6 +7,7 @@ import (
 	"github.com/MdRasB/mosaic/backend/internal/auth"
 	"github.com/MdRasB/mosaic/backend/internal/config"
 	"github.com/MdRasB/mosaic/backend/internal/domain/collection"
+	"github.com/MdRasB/mosaic/backend/internal/domain/review"
 	"github.com/MdRasB/mosaic/backend/internal/profile"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -19,6 +20,7 @@ func New(cfg config.Config, pool *pgxpool.Pool) http.Handler {
 		authHandler := auth.NewHandler(authService, cfg)
 		profileHandler := profile.NewHandler(profile.NewService(pool), authService, cfg)
 		collectionHandler := collection.NewHandler(collection.NewService(pool), authService, cfg)
+		reviewHandler := review.NewHandler(review.NewService(pool), authService, cfg)
 		mux.HandleFunc("/api/v1/auth/register", authHandler.Register)
 		mux.HandleFunc("/api/v1/auth/login", authHandler.Login)
 		mux.HandleFunc("/api/v1/auth/me", authHandler.Me)
@@ -33,6 +35,11 @@ func New(cfg config.Config, pool *pgxpool.Pool) http.Handler {
 		mux.HandleFunc("/api/v1/favorites/media", collectionHandler.Favorites)
 		mux.HandleFunc("/api/v1/watchlist", collectionHandler.Watchlist)
 		mux.HandleFunc("/api/v1/watchlist/", collectionHandler.Watchlist)
+		mux.HandleFunc("/api/v1/ratings", collectionHandler.Ratings)
+		mux.HandleFunc("/api/v1/ratings/", collectionHandler.Ratings)
+		mux.HandleFunc("/api/v1/reviews", reviewHandler.Reviews)
+		mux.HandleFunc("/api/v1/reviews/", reviewHandler.Reviews)
+		mux.HandleFunc("/api/v1/media/", reviewHandler.PublicForMedia)
 	}
 
 	return withCORS(cfg.AllowedOrigin, mux)

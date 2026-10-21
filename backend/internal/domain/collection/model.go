@@ -27,6 +27,8 @@ type Item struct {
 	IsFavorite      bool       `json:"is_favorite"`
 	Status          *string    `json:"status"`
 	StatusChangedAt *time.Time `json:"status_changed_at,omitempty"`
+	Rating          *float64   `json:"rating"`
+	RatedAt         *time.Time `json:"rated_at"`
 	CreatedAt       time.Time  `json:"created_at"`
 	UpdatedAt       time.Time  `json:"updated_at"`
 	FavoritedAt     *time.Time `json:"favorited_at,omitempty"`

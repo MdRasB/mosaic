@@ -30,8 +30,8 @@ func (s *Service) AddWatchlist(ctx context.Context, userID string, input MediaIn
 	var itemID int64
 	var created bool
 	var previous *string
-	if err := tx.QueryRow(ctx, `SELECT um.status FROM user_media um
-		WHERE um.user_id = $1 AND um.media_id = $2 FOR UPDATE`, userID, mediaID).Scan(&previous); err != nil && err != pgx.ErrNoRows {
+	if err := tx.QueryRow(ctx, `SELECT status FROM user_media
+		WHERE user_id = $1 AND media_id = $2 FOR UPDATE`, userID, mediaID).Scan(&previous); err != nil && err != pgx.ErrNoRows {
 		return Item{}, false, fmt.Errorf("lock existing watchlist item: %w", err)
 	}
 	err = tx.QueryRow(ctx, `INSERT INTO user_media
@@ -73,7 +73,6 @@ func (s *Service) SetStatus(ctx context.Context, userID string, itemID int64, st
 		return Item{}, fmt.Errorf("begin status transaction: %w", err)
 	}
 	defer tx.Rollback(ctx)
-
 	var previous *string
 	if err := tx.QueryRow(ctx, `SELECT status FROM user_media
 		WHERE id = $1 AND user_id = $2 AND status IS NOT NULL FOR UPDATE`,
@@ -103,33 +102,29 @@ func (s *Service) SetStatus(ctx context.Context, userID string, itemID int64, st
 	return s.Get(ctx, userID, itemID)
 }
 
+// RemoveWatchlist takes a title off the watchlist. The row itself is kept while
+// the title still holds any other personal state: collection membership, a
+// favorite, a rating or a review.
 func (s *Service) RemoveWatchlist(ctx context.Context, userID string, itemID int64) error {
 	tx, err := s.db.Begin(ctx)
 	if err != nil {
-		return fmt.Errorf("begin remove watchlist transaction: %w", err)
+		return fmt.Errorf("begin watchlist removal: %w", err)
 	}
 	defer tx.Rollback(ctx)
-	var status *string
-	if err := tx.QueryRow(ctx, `SELECT status FROM user_media
-		WHERE id = $1 AND user_id = $2 AND status IS NOT NULL FOR UPDATE`,
-		itemID, userID).Scan(&status); err != nil {
-		if err == pgx.ErrNoRows {
-			return ErrNotFound
-		}
-		return fmt.Errorf("lock watchlist item: %w", err)
-	}
-	if _, err := tx.Exec(ctx, `UPDATE user_media
-		SET status = NULL, status_changed_at = NULL, updated_at = now()
-		WHERE id = $1 AND user_id = $2`, itemID, userID); err != nil {
+
+	result, err := tx.Exec(ctx, `UPDATE user_media SET status = NULL, status_changed_at = NULL, updated_at = now()
+		WHERE id = $1 AND user_id = $2 AND status IS NOT NULL`, itemID, userID)
+	if err != nil {
 		return fmt.Errorf("remove watchlist item: %w", err)
 	}
-	if _, err := tx.Exec(ctx, `DELETE FROM user_media
-		WHERE id = $1 AND user_id = $2 AND in_collection = FALSE AND is_favorite = FALSE`,
-		itemID, userID); err != nil {
-		return fmt.Errorf("delete empty user media row: %w", err)
+	if result.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	if err := deleteIfEmpty(ctx, tx, userID, itemID); err != nil {
+		return err
 	}
 	if err := tx.Commit(ctx); err != nil {
-		return fmt.Errorf("commit remove watchlist transaction: %w", err)
+		return fmt.Errorf("commit watchlist removal: %w", err)
 	}
 	return nil
 }
