@@ -4,6 +4,8 @@ import { cachedQuery, invalidateCached } from "../api/query-cache.js";
 const queryString = ({ type = "all", sort = "recent", limit = 20, offset = 0 } = {}) =>
   new URLSearchParams({ type, sort, limit, offset }).toString();
 
+const listPath = (basePath, filters) => `${basePath}?${queryString(filters)}`;
+
 export const collectionService = {
   add: async (media) => {
     const result = await requestJSON("/collection", { method: "POST", body: JSON.stringify(media) });
@@ -15,7 +17,10 @@ export const collectionService = {
     type: media.media_type,
     id: media.provider_media_id
   })}`),
-  list: (filters) => cachedQuery(`/collection?${queryString(filters)}`, () => requestJSON(`/collection?${queryString(filters)}`)),
+  list: (filters) => {
+    const path = listPath("/collection", filters);
+    return cachedQuery(path, () => requestJSON(path));
+  },
   remove: async (id) => {
     const result = await requestJSON(`/collection/${id}`, { method: "DELETE" });
     invalidateCached("/collection", "/favorites");
@@ -39,5 +44,9 @@ export const collectionService = {
     invalidateCached("/collection", "/favorites");
     return result;
   },
-  listFavorites: (filters) => cachedQuery(`/favorites?${queryString(filters)}`, () => requestJSON(`/favorites?${queryString(filters)}`))
+  listFavorites: (filters) => {
+    const path = listPath("/favorites", filters);
+    return cachedQuery(path, () => requestJSON(path));
+  },
+  listCacheKey: (favoritePage, filters) => listPath(favoritePage ? "/favorites" : "/collection", filters)
 };

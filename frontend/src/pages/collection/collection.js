@@ -1,5 +1,6 @@
 import { imageUrl } from "../../api/tmdb.js";
 import { collectionService } from "../../collection/collection-service.js";
+import { readCached } from "../../api/query-cache.js";
 import { escapeHtml } from "../../utils/escape-html.js";
 
 function formatDate(value) {
@@ -38,8 +39,6 @@ function mediaCard(item, favoritePage) {
 
 function pageMarkup(favoritePage, filters) {
   const title = favoritePage ? "My Favorites" : "My Collection";
-  const sortLabel = favoritePage && filters.sort === "recent" ? "Recently favorited" :
-    filters.sort === "title" ? "Title" : filters.sort === "oldest" ? "Oldest added" : "Recently added";
   return `
     <section class="collection-page" aria-labelledby="collection-title">
       <div class="collection-heading">
@@ -49,7 +48,7 @@ function pageMarkup(favoritePage, filters) {
       </div>
       <div class="collection-toolbar">
         <div class="collection-tabs" role="tablist" aria-label="Filter by type">
-          ${["all", "movie", "tv"].map((type) => `<a class="button ${filters.type === type ? "button-primary" : "button-ghost"}" href="${favoritePage ? "/favorites" : "/collection"}?type=${type}&sort=${filters.sort}">${type === "all" ? "All" : type === "movie" ? "Movies" : "TV Shows"}</a>`).join("")}
+          ${["all", "movie", "tv"].map((type) => `<button class="button ${filters.type === type ? "button-primary" : "button-ghost"}" type="button" data-collection-type="${type}" aria-pressed="${filters.type === type}">${type === "all" ? "All" : type === "movie" ? "Movies" : "TV Shows"}</button>`).join("")}
         </div>
         <label class="collection-sort">Sort
           <select data-collection-sort>
@@ -60,7 +59,7 @@ function pageMarkup(favoritePage, filters) {
           </select>
         </label>
       </div>
-      <p class="collection-count muted" data-collection-count>Loading ${sortLabel.toLowerCase()} titles…</p>
+      <p class="collection-count muted" data-collection-count></p>
       <div class="collection-grid" data-collection-grid></div>
       <p class="profile-form-message" data-collection-message role="status" aria-live="polite"></p>
       <button class="button button-ghost collection-load-more" type="button" data-load-more hidden>Load more</button>
@@ -73,7 +72,7 @@ export async function renderCollectionPage(container, { favoritePage = false } =
     type: ["all", "movie", "tv"].includes(params.get("type")) ? params.get("type") : "all",
     sort: ["recent", "oldest", "title"].includes(params.get("sort")) ? params.get("sort") : "recent",
     offset: 0,
-    limit: 20
+    limit: 50
   };
   container.classList.remove("explore-shell");
   container.innerHTML = pageMarkup(favoritePage, filters);
@@ -83,30 +82,77 @@ export async function renderCollectionPage(container, { favoritePage = false } =
   const loadMore = container.querySelector("[data-load-more]");
   const sort = container.querySelector("[data-collection-sort]");
   let items = [];
+  let result;
 
   sort.addEventListener("change", () => {
-    const url = favoritePage ? "/favorites" : "/collection";
-    window.history.pushState({}, "", `${url}?type=${filters.type}&sort=${sort.value}`);
-    renderCollectionPage(container, { favoritePage });
+    filters.sort = sort.value;
+    updateURL();
+    renderItems();
   });
+
+  function updateURL() {
+    const url = favoritePage ? "/favorites" : "/collection";
+    window.history.replaceState({}, "", `${url}?type=${filters.type}&sort=${filters.sort}`);
+  }
+
+  function visibleItems() {
+    const filtered = filters.type === "all"
+      ? items
+      : items.filter((item) => item.media.media_type === filters.type);
+    return [...filtered].sort((left, right) => {
+      if (filters.sort === "title") return left.media.title.localeCompare(right.media.title);
+      const leftDate = new Date(favoritePage ? left.favorited_at ?? left.created_at : left.created_at).getTime();
+      const rightDate = new Date(favoritePage ? right.favorited_at ?? right.created_at : right.created_at).getTime();
+      return filters.sort === "oldest" ? leftDate - rightDate : rightDate - leftDate;
+    });
+  }
+
+  function renderItems() {
+    const visible = visibleItems();
+    count.textContent = `${visible.length} saved title${visible.length === 1 ? "" : "s"}`;
+    grid.innerHTML = visible.length
+      ? visible.map((item) => mediaCard(item, favoritePage)).join("")
+      : `<div class="collection-state"><h2>${favoritePage ? "No favorites yet." : "Your collection is empty."}</h2><p>${favoritePage ? "Use the heart on a title to save a favorite." : "Explore a movie or TV show and add it to your collection."}</p><a class="button button-primary" href="/explore">Explore titles</a></div>`;
+    loadMore.hidden = !result?.pagination.has_more;
+    container.querySelectorAll("[data-collection-type]").forEach((button) => {
+      const active = button.dataset.collectionType === filters.type;
+      button.classList.toggle("button-primary", active);
+      button.classList.toggle("button-ghost", !active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    bindActions();
+  }
+
+  function bindFilterActions() {
+    container.querySelectorAll("[data-collection-type]").forEach((button) => {
+      button.addEventListener("click", () => {
+        filters.type = button.dataset.collectionType;
+        updateURL();
+        renderItems();
+      });
+    });
+  }
 
   async function load(reset = true) {
     if (reset) {
       filters.offset = 0;
       items = [];
-      grid.innerHTML = `<div class="collection-state"><span class="spinner"></span><p>Loading your titles…</p></div>`;
+      const cached = readCached(collectionService.listCacheKey(favoritePage, {
+        type: "all",
+        sort: "recent",
+        limit: filters.limit,
+        offset: 0
+      }));
+      if (!cached) {
+        grid.innerHTML = `<div class="collection-state"><span class="spinner"></span><p>Loading your titles…</p></div>`;
+      }
     }
     try {
-      const result = favoritePage
-        ? await collectionService.listFavorites(filters)
-        : await collectionService.list(filters);
+      result = favoritePage
+        ? await collectionService.listFavorites({ ...filters, type: "all", sort: "recent" })
+        : await collectionService.list({ ...filters, type: "all", sort: "recent" });
       items = reset ? result.items : [...items, ...result.items];
-      count.textContent = `${result.pagination.total} saved title${result.pagination.total === 1 ? "" : "s"}`;
-      grid.innerHTML = items.length
-        ? items.map((item) => mediaCard(item, favoritePage)).join("")
-        : `<div class="collection-state"><h2>${favoritePage ? "No favorites yet." : "Your collection is empty."}</h2><p>${favoritePage ? "Use the heart on a title to save a favorite." : "Explore a movie or TV show and add it to your collection."}</p><a class="button button-primary" href="/explore">Explore titles</a></div>`;
-      loadMore.hidden = !result.pagination.has_more;
-      bindActions();
+      renderItems();
     } catch (error) {
       count.textContent = "";
       grid.innerHTML = `<div class="collection-state"><h2>We could not load this page.</h2><p>${escapeHtml(error.message)}</p><button class="button button-primary" type="button" data-retry>Try again</button></div>`;
@@ -153,5 +199,6 @@ export async function renderCollectionPage(container, { favoritePage = false } =
     });
   }
   loadMore.addEventListener("click", () => { filters.offset += filters.limit; load(false); });
+  bindFilterActions();
   await load();
 }
