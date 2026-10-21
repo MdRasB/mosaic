@@ -13,6 +13,7 @@ import { renderWatchlistPage } from "./pages/watchlist/watchlist.js";
 import { renderRatingsPage } from "./pages/ratings/ratings.js";
 import { renderReviewsPage } from "./pages/reviews/reviews.js";
 import { saveRecentSearch } from "./utils/recent-searches.js";
+import { clearQueryCache } from "./api/query-cache.js";
 
 const themeToggle = document.querySelector("#theme-toggle");
 const appShell = document.querySelector(".app-shell");
@@ -31,6 +32,7 @@ const searchForm = document.querySelector("#global-search-form");
 const searchInput = document.querySelector("#global-search");
 let currentUser = null;
 let currentProfile = null;
+let sessionLoaded = false;
 
 function setTheme(isLight, { persist = true } = {}) {
   document.documentElement.toggleAttribute("data-theme", isLight);
@@ -120,8 +122,10 @@ async function logout() {
   topbarLogoutButton.disabled = true;
   try {
     await authService.logout();
+    clearQueryCache();
     currentUser = null;
     currentProfile = null;
+    sessionLoaded = false;
     updateAuthControls();
     window.history.pushState({}, "", "/explore");
     renderRoute();
@@ -156,6 +160,10 @@ function safeRedirectPath(path) {
 }
 
 async function loadSession() {
+  if (sessionLoaded) {
+    updateAuthControls();
+    return;
+  }
   try {
     currentUser = await authService.me();
   } catch {
@@ -171,6 +179,7 @@ async function loadSession() {
     }
   }
 
+  sessionLoaded = true;
   updateAuthControls();
 }
 
